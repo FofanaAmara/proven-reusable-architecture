@@ -11,73 +11,129 @@ This document defines the key roles in the PRA registry ecosystem and their resp
 
 ```mermaid
 graph TD
-    A[Governance Table] --> B[Initiative Team]
-    A --> C[Contributing Architects]
-    B --> D[PRA Maintainers]
-    C --> D
-    D --> E[PRA Users]
+    GOV_DOM[Domain Governance Committees] --> ARCH[Contributing Architects]
+    GOV_BW[Expert Architects Governance Committee] --> ARCH
+    INIT[Initiative Team] --> ARCH
+    ARCH --> MAIN[PRA Maintainers]
+    MAIN --> USERS[PRA Users]
+
+    GOV_DOM -.-> GOV_BW
+
+    style GOV_DOM fill:#60a5fa,stroke:#2563eb,color:#fff
+    style GOV_BW fill:#8b5cf6,stroke:#7c3aed,color:#fff
 ```
 
-##  Governance Table
+##  Domain Governance Committees
 
 ### Composition
 
-- **Number**: 5 to 7 senior architects
-- **Representation**: Cross-team and cross-sector
+- **Number**: 3 to 5 architects per domain
+- **Profiles**: Solution architects from the domain
+- **Representation**: Different teams within the domain (Retail, Corporate, Wealth Management)
 - **Term**: Renewable annually
 - **Decisions**: By consensus or majority vote
 
 ### Responsibilities
 
-#### 1. Review Submissions
+#### 1. Review Domain PRAs
 
-- Evaluate new PRAs technically and qualitatively
+- Evaluate new domain PRAs technically and qualitatively
 - Verify compliance with standards
-- Request clarifications or improvements
+- Validate applicability within the domain
 - **Timeline**: Initial review within 5 business days
 
-#### 2. Approve PRAs
+#### 2. Approve Domain PRAs
 
-**For Candidate PRAs**:
+**For Domain PRAs Approved**:
 - Validate compliance with template
-- Verify proven-in-use (minimum 1)
-- Approve transition to Candidate status
-- **Threshold**: 2 approvals required
+- Verify 1+ proven-in-use within the domain
+- Approve transition to Approved status (domain level)
+- **Threshold**: 2 approvals required in domain committee
 
-**For Approved promotion**:
-- Verify 3+ documented proven-in-use
-- Validate positive multi-team feedback
-- Approve transition to Approved status
-- **Threshold**: 2 approvals required
+#### 3. Identify Bank-Wide Candidates
 
-#### 3. Cross-Cutting Governance
+- Identify domain PRAs reusable outside the domain
+- Propose Domain → Bank-Wide promotions
+- Provide justification and proof of reusability
 
-- Decide Sectorial  Transversal promotions
-- Approve deprecations
-- Validate standard evolutions
-- Arbitrate conflicts between sectors
+#### 4. Local Maintenance
 
-#### 4. Strategic Maintenance
-
-- Annual review of all Approved PRAs
-- Identify obsolete or underused PRAs
-- Propose process improvements
-- Monitor technological evolution
+- Quarterly review of domain PRAs
+- Identify obsolete PRAs in the domain
+- Adapt Bank-Wide standards to domain context
 
 ### Meetings
 
-- **Frequency**: Biweekly (every 2 weeks)
+- **Frequency**: Monthly
 - **Duration**: 1 hour maximum
 - **Typical agenda**:
-  - Review new submissions (30 min)
-  - Candidate PRA follow-up (15 min)
-  - Strategic topics (10 min)
+  - Review new domain submissions (30 min)
+  - Candidate domain PRA follow-up (15 min)
+  - Bank-Wide candidate identification (10 min)
   - Miscellaneous questions (5 min)
 
 ### Expected Commitment
 
-- **Time**: 2-4 hours/month
+- **Time**: 2-3 hours/month
 - **Availability**: PR review within 48h
+- **Participation**: 80%+ meetings
+
+##  Expert Architects Governance Committee
+
+### Composition
+
+- **Number**: 5 to 7 expert architects
+- **Profiles**: Expert architects close to practice
+- **Representation**: Cross-domain and cross-cutting teams
+- **Term**: Renewable annually
+- **Decisions**: By consensus or 2/3 vote
+
+### Responsibilities
+
+#### 1. Review Bank-Wide PRAs
+
+- Evaluate Bank-Wide standard PRAs (Flow 2: cross-cutting teams)
+- Evaluate Domain → Bank-Wide promotions (Flow 1)
+- Manage Bootstrap: identify and validate priorities (Flow 3)
+- **Timeline**: Review within 2 weeks
+
+#### 2. Approve Bank-Wide PRAs
+
+**For Bank-Wide PRAs Approved**:
+- Verify 3+ proven-in-use (different domains/teams)
+- Validate multi-domain applicability
+- Verify compliance with BNC target architecture
+- Approve transition to Bank-Wide Approved status
+- **Threshold**: 2 approvals required in committee
+
+#### 3. Strategic Governance
+
+- Approve Domain → Bank-Wide promotions
+- Approve Bank-Wide deprecations (with multi-domain consultation)
+- Validate new standards from cross-cutting teams
+- Arbitrate cross-domain conflicts
+
+#### 4. Bootstrap and Prioritization
+
+- Identify priority Bank-Wide topics
+- Search for existing candidates in domains
+- Validate direct promotion (bypass standard Domain process)
+- **Note**: Transitional flow, will decrease as registry matures
+
+### Meetings
+
+- **Frequency**: Biweekly (every 2 weeks)
+- **Duration**: 1.5 hours maximum
+- **Typical agenda**:
+  - Review Bank-Wide PRAs (Flow 2) (30 min)
+  - Review Domain → Bank-Wide promotions (Flow 1) (30 min)
+  - Bootstrap and priorities (Flow 3) (20 min)
+  - Strategic topics (10 min)
+
+### Expected Commitment
+
+- **Time**: 3-5 hours/month
+- **Availability**: PR review within 72h
 - **Participation**: 80%+ meetings
 
 ##  PRA Initiative Team
@@ -261,17 +317,23 @@ Architects designated as responsible for one or more specific PRAs.
 
 ##  RACI Matrix
 
-| Activity | Gov. Table | Init. Team | Contributors | Maintainers | Users |
-|----------|------------|------------|--------------|-------------|-------|
-| Submit new PRA | C | I | **R** | I | I |
-| Review candidate PRA | **R/A** | C | C | I | I |
-| Approve candidate PRA | **A** | I | I | C | I |
-| Maintain infrastructure | I | **R/A** | I | I | I |
-| Maintain PRA | I | C | I | **R/A** | C |
-| Use PRA | I | I | I | C | **R/A** |
-| Promote sectoraltransversal | **A** | C | R | C | I |
-| Deprecate PRA | **A** | C | C | R | C |
-| Train community | C | **R/A** | C | C | I |
+| Activity | Domain Committees | Expert Committee | Init. Team | Contributors | Maintainers | Users |
+|----------|-------------------|------------------|------------|--------------|-------------|-------|
+| Submit Domain PRA | C | I | I | **R** | I | I |
+| Review Domain PRA | **R/A** | I | C | C | I | I |
+| Approve Domain PRA | **A** | I | I | I | C | I |
+| Submit Bank-Wide PRA | I | C | I | **R** | I | I |
+| Review Bank-Wide PRA | I | **R/A** | C | C | I | I |
+| Approve Bank-Wide PRA | I | **A** | I | I | C | I |
+| Propose Domain→BW promotion | **R** | C | I | C | C | I |
+| Approve Domain→BW promotion | C | **A** | I | C | C | I |
+| Bootstrap (identify priorities) | C | **R/A** | C | I | I | I |
+| Maintain infrastructure | I | I | **R/A** | I | I | I |
+| Maintain PRA | I | I | C | I | **R/A** | C |
+| Use PRA | I | I | I | I | C | **R/A** |
+| Deprecate Domain PRA | **A** | I | C | C | R | C |
+| Deprecate Bank-Wide PRA | C | **A** | C | C | R | C |
+| Train community | I | I | **R/A** | C | C | I |
 
 **Legend**:
 - **R**: Responsible (does the work)
@@ -281,9 +343,15 @@ Architects designated as responsible for one or more specific PRAs.
 
 ##  Contacts
 
-### Governance Table
+### Domain Governance Committees
+- **Retail**: `#pra-retail` | pra-retail@company.com
+- **Corporate**: `#pra-corporate` | pra-corporate@company.com
+- **Wealth Management**: `#pra-wm` | pra-wm@company.com
+
+### Expert Architects Governance Committee
+- **Teams Channel**: `#pra-governance`
 - **Email**: pra-governance@company.com
-- **Members**: See [Governance Page](/registre/governance)
+- **Members**: See [Governance Page](/guides/08-governance)
 
 ### Initiative Team
 - **Teams Channel**: `#pra-initiative`
@@ -315,5 +383,5 @@ Architects designated as responsible for one or more specific PRAs.
 
 ---
 
-**Last updated**: 2025-11-28
-**Next review**: 2026-05-28
+**Last updated**: 2025-12-02
+**Next review**: 2026-06-02

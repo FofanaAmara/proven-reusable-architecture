@@ -11,73 +11,129 @@ Ce document définit les rôles clés dans l'écosystème du registre PRA et leu
 
 ```mermaid
 graph TD
-    A[Table de Gouvernance] --> B[Équipe Initiative]
-    A --> C[Architectes Contributeurs]
-    B --> D[Mainteneurs PRA]
-    C --> D
-    D --> E[Utilisateurs PRA]
+    GOV_DOM[Comités Gouvernance Domaine] --> ARCH[Architectes Contributeurs]
+    GOV_BW[Comité Gouvernance Architectes Experts] --> ARCH
+    INIT[Équipe Initiative] --> ARCH
+    ARCH --> MAIN[Mainteneurs PRA]
+    MAIN --> USERS[Utilisateurs PRA]
+
+    GOV_DOM -.-> GOV_BW
+
+    style GOV_DOM fill:#60a5fa,stroke:#2563eb,color:#fff
+    style GOV_BW fill:#8b5cf6,stroke:#7c3aed,color:#fff
 ```
 
-##  Table de Gouvernance
+##  Comités de Gouvernance par Domaine
 
 ### Composition
 
-- **Nombre** : 5 à 7 architectes seniors
-- **Représentation** : Cross-équipes et cross-secteurs
+- **Nombre** : 3 à 5 architectes par domaine
+- **Profils** : Architectes de solutions du domaine
+- **Représentation** : Différentes équipes du domaine (Particuliers, Entreprises, Gestion de Patrimoine)
 - **Mandat** : Renouvelable annuellement
 - **Décisions** : Par consensus ou vote majoritaire
 
 ### Responsabilités
 
-#### 1. Review des Soumissions
+#### 1. Review des PRA Domaine
 
-- Évaluer techniquement et qualitativement les nouveaux PRA
+- Évaluer techniquement et qualitativement les nouveaux PRA du domaine
 - Vérifier conformité aux standards
-- Demander clarifications ou améliorations
+- Valider applicabilité dans le domaine
 - **Timeline** : Review initiale sous 5 jours ouvrés
 
-#### 2. Approbation des PRA
+#### 2. Approbation des PRA Domaine
 
-**Pour les PRA Candidates** :
+**Pour les PRA Domaine Approved** :
 - Valider conformité au template
-- Vérifier proven-in-use (minimum 1)
-- Approuver passage en statut Candidate
-- **Seuil** : 2 approvals requis
+- Vérifier 1+ proven-in-use dans le domaine
+- Approuver passage en statut Approved (échelle domaine)
+- **Seuil** : 2 approvals requis dans le comité domaine
 
-**Pour promotion Approved** :
-- Vérifier 3+ proven-in-use documentés
-- Valider feedback positif multi-équipes
-- Approuver passage en statut Approved
-- **Seuil** : 2 approvals requis
+#### 3. Identification Candidats Bank-Wide
 
-#### 3. Gouvernance Transversale
+- Identifier PRA domaine réutilisables hors du domaine
+- Proposer promotions Domaine → Bank-Wide
+- Fournir justification et preuves de réutilisabilité
 
-- Décider promotions Sectoriel  Transversal
-- Approuver dépréciations
-- Valider évolutions de standards
-- Arbitrer conflits entre secteurs
+#### 4. Maintenance Locale
 
-#### 4. Maintenance Stratégique
-
-- Review annuelle de tous les PRA Approved
-- Identifier PRA obsolètes ou sous-utilisés
-- Proposer améliorations processus
-- Veiller sur l'évolution technologique
+- Review trimestrielle des PRA domaine
+- Identifier PRA obsolètes dans le domaine
+- Adapter standards Bank-Wide au contexte domaine
 
 ### Réunions
 
-- **Fréquence** : Bimensuelle (toutes les 2 semaines)
+- **Fréquence** : Mensuelle
 - **Durée** : 1h maximum
 - **Agenda type** :
-  - Review nouvelles soumissions (30 min)
-  - Suivi PRA candidates (15 min)
-  - Points stratégiques (10 min)
+  - Review nouvelles soumissions domaine (30 min)
+  - Suivi PRA candidates domaine (15 min)
+  - Identification candidats Bank-Wide (10 min)
   - Questions diverses (5 min)
 
 ### Engagement Attendu
 
-- **Temps** : 2-4 heures/mois
+- **Temps** : 2-3 heures/mois
 - **Disponibilité** : Review PR sous 48h
+- **Participation** : 80%+ réunions
+
+##  Comité de Gouvernance Architectes Experts
+
+### Composition
+
+- **Nombre** : 5 à 7 architectes experts
+- **Profils** : Architectes experts proches de la pratique
+- **Représentation** : Cross-domaines et cross-équipes transversales
+- **Mandat** : Renouvelable annuellement
+- **Décisions** : Par consensus ou vote 2/3
+
+### Responsabilités
+
+#### 1. Review des PRA Bank-Wide
+
+- Évaluer PRA standards transversaux (Flow 2 : équipes transversales)
+- Évaluer promotions Domaine → Bank-Wide (Flow 1)
+- Gérer Bootstrap : identifier et valider priorités (Flow 3)
+- **Timeline** : Review sous 2 semaines
+
+#### 2. Approbation des PRA Bank-Wide
+
+**Pour les PRA Bank-Wide Approved** :
+- Vérifier 3+ proven-in-use (différents domaines/équipes)
+- Valider applicabilité multi-domaine
+- Vérifier conformité architecture cible BNC
+- Approuver passage en statut Approved Bank-Wide
+- **Seuil** : 2 approvals requis dans le comité
+
+#### 3. Gouvernance Stratégique
+
+- Approuver promotions Domaine → Bank-Wide
+- Approuver dépréciations Bank-Wide (avec consultation multi-domaine)
+- Valider nouveaux standards des équipes transversales
+- Arbitrer conflits inter-domaines
+
+#### 4. Bootstrap et Priorisation
+
+- Identifier sujets prioritaires Bank-Wide
+- Rechercher candidats existants dans domaines
+- Valider promotion directe (bypass Domaine standard)
+- **Note** : Flux transitoire, diminuera avec maturité registre
+
+### Réunions
+
+- **Fréquence** : Bimensuelle (toutes les 2 semaines)
+- **Durée** : 1h30 maximum
+- **Agenda type** :
+  - Review PRAs Bank-Wide (Flow 2) (30 min)
+  - Review promotions Domaine → Bank-Wide (Flow 1) (30 min)
+  - Bootstrap et priorités (Flow 3) (20 min)
+  - Points stratégiques (10 min)
+
+### Engagement Attendu
+
+- **Temps** : 3-5 heures/mois
+- **Disponibilité** : Review PR sous 72h
 - **Participation** : 80%+ réunions
 
 ##  Équipe Initiative PRA
@@ -261,17 +317,23 @@ Architectes désignés comme responsables d'un ou plusieurs PRA spécifiques.
 
 ##  Matrice RACI
 
-| Activité | Table Gouv. | Équipe Init. | Contributeurs | Mainteneurs | Utilisateurs |
-|----------|-------------|--------------|---------------|-------------|--------------|
-| Soumettre nouveau PRA | C | I | **R** | I | I |
-| Review PRA candidate | **R/A** | C | C | I | I |
-| Approuver PRA candidate | **A** | I | I | C | I |
-| Maintenir infrastructure | I | **R/A** | I | I | I |
-| Maintenir PRA | I | C | I | **R/A** | C |
-| Utiliser PRA | I | I | I | C | **R/A** |
-| Promouvoir sectorieltransversal | **A** | C | R | C | I |
-| Déprécier PRA | **A** | C | C | R | C |
-| Former communauté | C | **R/A** | C | C | I |
+| Activité | Comités Domaine | Comité Experts | Équipe Init. | Contributeurs | Mainteneurs | Utilisateurs |
+|----------|-----------------|----------------|--------------|---------------|-------------|--------------|
+| Soumettre PRA Domaine | C | I | I | **R** | I | I |
+| Review PRA Domaine | **R/A** | I | C | C | I | I |
+| Approuver PRA Domaine | **A** | I | I | I | C | I |
+| Soumettre PRA Bank-Wide | I | C | I | **R** | I | I |
+| Review PRA Bank-Wide | I | **R/A** | C | C | I | I |
+| Approuver PRA Bank-Wide | I | **A** | I | I | C | I |
+| Proposer promotion Domaine→BW | **R** | C | I | C | C | I |
+| Approuver promotion Domaine→BW | C | **A** | I | C | C | I |
+| Bootstrap (identifier priorités) | C | **R/A** | C | I | I | I |
+| Maintenir infrastructure | I | I | **R/A** | I | I | I |
+| Maintenir PRA | I | I | C | I | **R/A** | C |
+| Utiliser PRA | I | I | I | I | C | **R/A** |
+| Déprécier PRA Domaine | **A** | I | C | C | R | C |
+| Déprécier PRA Bank-Wide | C | **A** | C | C | R | C |
+| Former communauté | I | I | **R/A** | C | C | I |
 
 **Légende** :
 - **R** : Responsable (fait le travail)
@@ -281,9 +343,15 @@ Architectes désignés comme responsables d'un ou plusieurs PRA spécifiques.
 
 ##  Contacts
 
-### Table de Gouvernance
+### Comités de Gouvernance Domaine
+- **Particuliers** : `#pra-particuliers` | pra-particuliers@company.com
+- **Entreprises** : `#pra-entreprises` | pra-entreprises@company.com
+- **Gestion de Patrimoine** : `#pra-gp` | pra-gp@company.com
+
+### Comité de Gouvernance Architectes Experts
+- **Canal Teams** : `#pra-governance`
 - **Email** : pra-governance@company.com
-- **Membres** : Voir [Page Gouvernance](/registre/governance)
+- **Membres** : Voir [Page Gouvernance](/guides/08-governance)
 
 ### Équipe Initiative
 - **Canal Teams** : `#pra-initiative`
@@ -315,5 +383,5 @@ Architectes désignés comme responsables d'un ou plusieurs PRA spécifiques.
 
 ---
 
-**Dernière mise à jour** : 2025-11-28
-**Prochaine review** : 2026-05-28
+**Dernière mise à jour** : 2025-12-02
+**Prochaine review** : 2026-06-02
