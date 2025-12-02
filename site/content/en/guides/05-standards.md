@@ -16,15 +16,15 @@ A quality PRA must be:
 - ** Well documented**: Clear, complete and maintainable
 - ** Maintainable**: Scalable and supported over time
 
-##  Criteria by Status
+##  Criteria by Status and Scope
 
-### For a Candidate PRA
+### For a Domain PRA Candidate
 
 #### Mandatory Criteria
 
- **At least 1 documented proven-in-use**
+ **At least 1 documented proven-in-use within the domain**
 - Production project (not dev/staging)
-- Concrete and measurable feedback
+- Concrete and measurable feedback from domain context
 - Recent date (< 2 years)
 
  **Complete documentation**
@@ -52,30 +52,73 @@ A quality PRA must be:
 -  Migration guide (if applicable)
 -  FAQ based on experience
 
-### For an Approved PRA
+### For a Bank-Wide PRA Candidate
+
+#### Mandatory Criteria
+
+ **At least 1 documented proven-in-use**
+- Production project (not dev/staging)
+- Concrete and measurable feedback
+- Recent date (< 2 years)
+- Demonstrated multi-domain applicability
+
+ **Complete documentation** (same as Domain PRA)
+
+ **Demonstrated reusability across domains**
+- Generalizable pattern for multiple domains
+- Not specific to a single domain context
+- Configurable for different domain contexts
+
+ **Technical quality** (same as Domain PRA)
+
+### For a Domain PRA Approved
 
 #### Mandatory Criteria (in addition to Candidate)
 
- **At least 3 documented proven-in-use**
-- Different teams
-- Different application contexts
-- Positive feedback (satisfaction > 7/10)
+ **At least 1 documented proven-in-use within the domain**
+- Positive feedback from domain teams (satisfaction > 7/10)
+- Confirmed reusability within domain
 
- **Enriched documentation**
-- Learnings from multiple implementations
-- Varied use cases
-- Common pitfalls documented
-- Troubleshooting guide
+ **Documentation enriched with domain learnings**
+- Domain-specific use cases
+- Common pitfalls in domain context
+- Domain-specific troubleshooting guide
 
  **Active maintenance**
 - Designated and active maintainer
 - Last update < 6 months
 - Responses to questions < 1 week
 
- **Growing adoption**
-- Positive usage trend
+ **Growing adoption within domain**
+- Positive usage trend in domain
 - No major negative feedback
-- Recommended by peers
+- Recommended by domain peers
+
+### For a Bank-Wide PRA Approved
+
+#### Mandatory Criteria (in addition to Candidate)
+
+ **At least 3 documented proven-in-use from different domains/teams**
+- Different teams from multiple domains
+- Different application contexts across domains
+- Positive multi-domain feedback (satisfaction > 7/10)
+
+ **Documentation enriched with multi-domain learnings**
+- Learnings from implementations across multiple domains
+- Varied use cases from different domain contexts
+- Common pitfalls documented with multi-domain perspective
+- Troubleshooting guide applicable across domains
+
+ **Active maintenance**
+- Designated and active maintainer
+- Last update < 6 months
+- Responses to questions < 1 week
+- Multi-domain support capability
+
+ **Growing multi-domain adoption**
+- Positive usage trend across multiple domains
+- No major negative feedback from any domain
+- Recommended by peers across different domains
 
 ##  Template and Structure
 
@@ -286,7 +329,9 @@ Before submitting a PRA, verify:
 
 ### Proven-in-use
 
-- [ ] Required minimum documented (1 for candidate, 3 for approved)
+- [ ] Required minimum documented:
+  - Domain PRA: 1+ for Candidate and Approved
+  - Bank-Wide PRA: 1+ for Candidate, 3+ (multi-domain) for Approved
 - [ ] Real named projects
 - [ ] Feedback with metrics
 - [ ] Recent dates (< 2 years)
@@ -388,7 +433,8 @@ Users can:
 For questions about standards:
 
 - **Teams Channel**: `#pra-quality`
-- **Governance Table Email**: pra-governance@company.com
+- **Domain Committees**: Contact your domain governance committee
+- **Expert Architects Committee Email**: pra-governance@company.com
 - **Template Documentation**: [Link to template]
 
 ---
@@ -411,5 +457,5 @@ For questions about standards:
 
 ---
 
-**Last updated**: 2025-11-28
-**Next review**: 2026-05-28
+**Last updated**: 2025-12-02
+**Next review**: 2026-06-02

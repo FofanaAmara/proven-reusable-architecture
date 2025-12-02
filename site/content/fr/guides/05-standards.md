@@ -16,15 +16,15 @@ Un PRA de qualité doit être :
 - ** Bien documenté** : Clair, complet et maintenable
 - ** Maintenable** : Évolutif et supporté dans le temps
 
-##  Critères par Statut
+##  Critères par Statut et Scope
 
-### Pour un PRA Candidate
+### Pour un PRA Domaine Candidate
 
 #### Critères Obligatoires
 
- **Au moins 1 proven-in-use documenté**
+ **Au moins 1 proven-in-use documenté dans le domaine**
 - Projet en production (pas dev/staging)
-- Feedback concret et mesurable
+- Feedback concret et mesurable dans le contexte du domaine
 - Date récente (< 2 ans)
 
  **Documentation complète**
@@ -52,30 +52,73 @@ Un PRA de qualité doit être :
 -  Guide de migration (si applicable)
 -  FAQ basée sur l'expérience
 
-### Pour un PRA Approved
+### Pour un PRA Bank-Wide Candidate
+
+#### Critères Obligatoires
+
+ **Au moins 1 proven-in-use documenté**
+- Projet en production (pas dev/staging)
+- Feedback concret et mesurable
+- Date récente (< 2 ans)
+- Applicabilité multi-domaine démontrée
+
+ **Documentation complète** (même que PRA Domaine)
+
+ **Réutilisabilité démontrée multi-domaine**
+- Patron généralisable pour plusieurs domaines
+- Non spécifique à un seul contexte de domaine
+- Paramétrable pour différents contextes de domaine
+
+ **Qualité technique** (même que PRA Domaine)
+
+### Pour un PRA Domaine Approved
 
 #### Critères Obligatoires (en plus de Candidate)
 
- **Au moins 3 proven-in-use documentés**
-- Différentes équipes
-- Différents contextes d'application
-- Feedback positif (satisfaction > 7/10)
+ **Au moins 1 proven-in-use documenté dans le domaine**
+- Feedback positif des équipes du domaine (satisfaction > 7/10)
+- Réutilisabilité confirmée au sein du domaine
 
- **Documentation enrichie**
-- Learnings de multiples implémentations
-- Cas d'usage variés
-- Pièges courants documentés
-- Guide de troubleshooting
+ **Documentation enrichie avec learnings du domaine**
+- Cas d'usage spécifiques au domaine
+- Pièges courants dans le contexte du domaine
+- Guide de troubleshooting spécifique au domaine
 
  **Maintenance active**
 - Mainteneur désigné et actif
 - Dernière mise à jour < 6 mois
 - Réponses aux questions < 1 semaine
 
- **Adoption croissante**
-- Tendance positive d'utilisation
+ **Adoption croissante dans le domaine**
+- Tendance positive d'utilisation dans le domaine
 - Pas de feedback négatif majeur
-- Recommandé par pairs
+- Recommandé par pairs du domaine
+
+### Pour un PRA Bank-Wide Approved
+
+#### Critères Obligatoires (en plus de Candidate)
+
+ **Au moins 3 proven-in-use documentés de différents domaines/équipes**
+- Différentes équipes de plusieurs domaines
+- Différents contextes d'application multi-domaines
+- Feedback positif multi-domaine (satisfaction > 7/10)
+
+ **Documentation enrichie avec learnings multi-domaine**
+- Learnings d'implémentations à travers plusieurs domaines
+- Cas d'usage variés de différents contextes de domaine
+- Pièges courants documentés avec perspective multi-domaine
+- Guide de troubleshooting applicable à tous les domaines
+
+ **Maintenance active**
+- Mainteneur désigné et actif
+- Dernière mise à jour < 6 mois
+- Réponses aux questions < 1 semaine
+- Capacité de support multi-domaine
+
+ **Adoption croissante multi-domaine**
+- Tendance positive d'utilisation à travers plusieurs domaines
+- Pas de feedback négatif majeur d'aucun domaine
+- Recommandé par pairs de différents domaines
 
 ##  Template et Structure
 
@@ -286,7 +329,9 @@ Avant de soumettre un PRA, vérifier :
 
 ### Proven-in-use
 
-- [ ] Minimum requis documenté (1 pour candidate, 3 pour approved)
+- [ ] Minimum requis documenté :
+  - PRA Domaine : 1+ pour Candidate et Approved
+  - PRA Bank-Wide : 1+ pour Candidate, 3+ (multi-domaine) pour Approved
 - [ ] Projets réels nommés
 - [ ] Feedback avec métriques
 - [ ] Dates récentes (< 2 ans)
@@ -388,7 +433,8 @@ Les utilisateurs peuvent :
 Pour questions sur les standards :
 
 - **Canal Teams** : `#pra-quality`
-- **Email Table Gouvernance** : pra-governance@company.com
+- **Comités Domaine** : Contactez votre comité de gouvernance de domaine
+- **Email Comité Architectes Experts** : pra-governance@company.com
 - **Documentation Template** : [Lien vers template]
 
 ---
@@ -411,5 +457,5 @@ Pour questions sur les standards :
 
 ---
 
-**Dernière mise à jour** : 2025-11-28
-**Prochaine review** : 2026-05-28
+**Dernière mise à jour** : 2025-12-02
+**Prochaine review** : 2026-06-02
