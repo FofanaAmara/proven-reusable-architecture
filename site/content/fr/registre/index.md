@@ -16,65 +16,60 @@ Un **PRA (Proven Reusable Architecture)** est une **solution éprouvée** qui a 
 ### Vue d'ensemble de l'écosystème PRA
 
 ```mermaid
-%%{init: {'theme':'base', 'themeVariables': { 'fontSize':'16px'}}}%%
+%%{init: {'theme':'base', 'themeVariables': { 'fontSize':'18px'}}}%%
 graph TB
-    subgraph TRANS["⚡ ÉQUIPES TRANSVERSALES"]
-        SEC["Sécurité"]
-        INFRA["Infra Cloud"]
-        SE["Software Engineering"]
-    end
+    ARCH["🏗️<br/>ARCHITECTES<br/>dans les Domaines"]
+    TRANS["⚡<br/>ÉQUIPES TRANSVERSALES<br/>(Software Engineering, etc.)"]
+    BOOT["🚀<br/>BOOTSTRAP<br/>(Identification PRAs prioritaires)"]
 
-    subgraph DOMAINS["🏢 DOMAINES MÉTIER"]
-        PART["Particuliers"]
-        ENT["Entreprises"]
-        GP["Gestion Patrimoine"]
-    end
+    GOV_DOM["🔵 Comités Gouvernance<br/>Domaine"]
+    GOV_BW["🟣 Comité Gouvernance<br/>Architectes Experts"]
 
-    subgraph GOV_DOM["🔵 GOUVERNANCE DOMAINE"]
-        GOVD["Comités de Gouvernance<br/>par Domaine"]
-    end
+    DOM["🔵<br/>PRAs DOMAINE"]
+    BW["🟢<br/>PRAs BANK-WIDE"]
 
-    subgraph GOV_BW["🟣 GOUVERNANCE BANK-WIDE"]
-        GOVB["Communauté d'Architectes<br/>Experts"]
-    end
+    ARCH -->|"Architectures"| GOV_DOM
+    GOV_DOM -->|"Flux 1:<br/>Évalué réutilisable"| DOM
+    DOM -->|"Si réutilisable<br/>hors domaine"| GOV_BW
 
-    DOM["🔵<br/>PRAs DOMAINE<br/>(Tous types de patterns)"]
-    BW["🟢<br/>PRAs BANK-WIDE<br/>(Patterns validés pour toute la banque)"]
+    TRANS -->|"Flux 2:<br/>Nouveaux standards"| GOV_BW
 
-    TRANS -->|"PRAs infrastructure/<br/>fondation<br/>(direct)"| GOVB
-    DOMAINS -->|"PRAs<br/>fonctionnels"| DOM
-    DOM -->|"Validation<br/>locale"| GOV_DOM
-    GOV_DOM -->|"Patterns répétés<br/>→ Promotion"| GOVB
-    GOVB -->|"Approbation"| BW
+    BOOT -.->|"Flux 3:<br/>Candidats existants<br/>dans domaines"| GOV_BW
 
-    style BW fill:#10b981,stroke:#059669,stroke-width:4px,color:#fff
-    style DOM fill:#3b82f6,stroke:#2563eb,stroke-width:4px,color:#fff
-    style GOV_BW fill:#8b5cf6,stroke:#7c3aed,stroke-width:3px,color:#fff
-    style GOV_DOM fill:#60a5fa,stroke:#2563eb,stroke-width:3px,color:#fff
-    style TRANS fill:#f59e0b,stroke:#d97706,stroke-width:3px,color:#000
-    style DOMAINS fill:#fbbf24,stroke:#d97706,stroke-width:3px,color:#000
+    GOV_BW -->|"Approuvé"| BW
+
+    style BW fill:#10b981,stroke:#059669,stroke-width:5px,color:#fff
+    style DOM fill:#3b82f6,stroke:#2563eb,stroke-width:5px,color:#fff
+    style GOV_BW fill:#8b5cf6,stroke:#7c3aed,stroke-width:4px,color:#fff
+    style GOV_DOM fill:#60a5fa,stroke:#2563eb,stroke-width:4px,color:#fff
+    style ARCH fill:#fbbf24,stroke:#d97706,stroke-width:4px,color:#000
+    style TRANS fill:#f59e0b,stroke:#d97706,stroke-width:4px,color:#000
+    style BOOT fill:#ef4444,stroke:#dc2626,stroke-width:4px,color:#fff
 ```
 
-**Deux flux de création de PRAs :**
+**Trois flux de création de PRAs :**
 
-**🟠 Flux 1 : Bank-Wide Direct (Équipes Transversales)**
-- Équipes transversales : Sécurité, Infra Cloud, Software Engineering
-- **Idéalement** créent des PRAs directement Bank-Wide (patterns infrastructure/fondation)
-- Exemples : CI/CD, observabilité, sécurité réseau, gestion des secrets
-- Validés par la Communauté d'Architectes Experts
+**🔵 Flux 1 : Domaine → Bank-Wide (Émergence organique)**
+1. Architectes dans domaines définissent des **architectures**
+2. Certaines architectures évaluées **réutilisables** → deviennent **PRAs Domaine**
+3. Validation par **Comité de Gouvernance local** du domaine
+4. PRAs Domaine réutilisables **hors du domaine** → promotion **Bank-Wide**
+5. Review par **Comité Gouvernance Architectes Experts** → approuvés Bank-Wide
 
-**🔵 Flux 2 : Domaine → Bank-Wide (Pragmatique)**
-- Architectes de solutions dans les domaines créent **tous types de PRAs** :
-  - Fonctionnels : Customer Onboarding, Payment Processing, Notification System
-  - **Techniques aussi** : Serverless AWS, file transfer, APIs asynchrones
-- Pourquoi technique aussi ? **Absence de pattern Bank-Wide** → les domaines comblent le vide
-- Validés localement par les Comités de Gouvernance
-- **Patterns répétés entre domaines** ou **particulièrement robustes** → promotion Bank-Wide
+**🟠 Flux 2 : Standards Transversaux → Bank-Wide (Top-down)**
+1. Équipes transversales (Software Engineering, Sécurité, Infra Cloud) définissent **nouveaux standards** pour la banque
+2. Standards se traduisent en **PRAs Bank-Wide**
+3. Review par **Comité Gouvernance Architectes Experts** → approuvés Bank-Wide
+4. Exemples : CI/CD, observabilité, sécurité réseau, gestion des secrets
 
-**Réalité actuelle :**
-- Même sujet (ex: serverless) peut exister dans plusieurs domaines (duplication)
-- Le Registre PRA aide à **identifier ces duplications** et **promouvoir le meilleur** en Bank-Wide
-- Un pattern technique d'un domaine peut devenir Bank-Wide si robuste et proven (ex: file transfer de Gestion Patrimoine)
+**🔴 Flux 3 : Bootstrapping (Situation actuelle - Transitoire)**
+1. **Réalité** : Pas de registre de patrons existant actuellement
+2. **Stratégie de démarrage rapide** :
+   - Identifier **sujets prioritaires** à couvrir Bank-Wide
+   - Chercher **architectures existantes** dans les domaines (bons candidats)
+   - Les rendre **directement disponibles Bank-Wide** (sans passer par Flux 1)
+3. Permet de peupler rapidement le registre initial
+4. Exemple : File transfer de Gestion Patrimoine identifié comme prioritaire → directement Bank-Wide
 
 ### Comment un PRA naît et évolue
 
