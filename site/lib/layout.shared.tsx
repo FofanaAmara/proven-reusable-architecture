@@ -1,7 +1,6 @@
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 import Image from 'next/image';
 import { type Language, t } from './i18n';
-import { CustomNav } from '@/components/CustomNav';
 
 export function baseOptions(lang: Language = 'fr'): BaseLayoutProps {
   return {
@@ -22,8 +21,6 @@ export function baseOptions(lang: Language = 'fr'): BaseLayoutProps {
       ),
       url: `/${lang}`,
       transparentMode: 'none',
-      // Language switcher after search bar
-      children: <CustomNav lang={lang} />,
     },
     links: [
       {

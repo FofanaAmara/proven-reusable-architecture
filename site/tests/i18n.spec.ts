@@ -33,7 +33,7 @@ test.describe('Internationalization (i18n)', () => {
   });
 
   test('should have language switcher visible', async ({ page }) => {
-    await page.goto('/fr');
+    await page.goto('/fr/registre');
 
     // Check for FR and EN buttons (use more specific selectors)
     const frButton = page.getByRole('link', { name: /Switch to Français/i }).or(
@@ -48,41 +48,41 @@ test.describe('Internationalization (i18n)', () => {
   });
 
   test('should switch from French to English using language switcher', async ({ page }) => {
-    await page.goto('/fr');
+    await page.goto('/fr/registre');
 
     // Click English button - use the link with aria-label
     await page.getByRole('link', { name: 'Switch to English' }).click();
 
-    // Should redirect to /en
-    await expect(page).toHaveURL('/en');
+    // Should redirect to /en/registre
+    await expect(page).toHaveURL('/en/registre');
 
     // Check English content is displayed
-    await expect(page.getByRole('link', { name: 'Home' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Library' })).toBeVisible();
   });
 
   test('should switch from English to French using language switcher', async ({ page }) => {
-    await page.goto('/en');
+    await page.goto('/en/registre');
 
     // Click French button - use the link with aria-label
     await page.getByRole('link', { name: 'Switch to Français' }).click();
 
-    // Should redirect to /fr
-    await expect(page).toHaveURL('/fr');
+    // Should redirect to /fr/registre
+    await expect(page).toHaveURL('/fr/registre');
 
     // Check French content is displayed
-    await expect(page.getByRole('link', { name: 'Accueil' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Librairie' })).toBeVisible();
   });
 
   test('should preserve page path when switching languages', async ({ page }) => {
-    // Start on French catalogue
-    await page.goto('/fr/catalogue');
-    await expect(page).toHaveURL('/fr/catalogue');
+    // Start on French registre
+    await page.goto('/fr/registre');
+    await expect(page).toHaveURL('/fr/registre');
 
     // Switch to English
     await page.getByRole('link', { name: 'Switch to English' }).click();
 
-    // Should be on English catalogue
-    await expect(page).toHaveURL('/en/catalogue');
+    // Should be on English registre
+    await expect(page).toHaveURL('/en/registre');
   });
 
   test('should access French catalogue at /fr/catalogue', async ({ page }) => {
