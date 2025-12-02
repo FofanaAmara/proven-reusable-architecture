@@ -91,31 +91,31 @@ export default async function HomePage({
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
               {/* Flow 1 */}
               <div className="bg-gray-50 rounded border border-gray-300 p-6">
-                <div className="text-2xl font-semibold mb-2 text-blue-600">Flow 1</div>
+                <div className="text-2xl font-semibold mb-2 text-gray-900">Flow 1</div>
                 <h3 className="text-lg font-semibold mb-3 text-gray-900">
                   {lang === 'fr' ? 'Organique (Domaine → Bank-Wide)' : 'Organic (Domain → Bank-Wide)'}
                 </h3>
                 <p className="text-sm text-gray-600 mb-4">
                   {lang === 'fr'
-                    ? 'Les architectes de domaine identifient des patterns réutilisables dans leurs projets. Les meilleurs sont promus au niveau Bank-Wide.'
-                    : 'Domain architects identify reusable patterns in their projects. The best ones are promoted to Bank-Wide level.'}
+                    ? 'Les architectes de solutions du domaine identifient des patterns réutilisables dans leurs projets. Les meilleurs sont promus au niveau Bank-Wide.'
+                    : 'Domain solution architects identify reusable patterns in their projects. The best ones are promoted to Bank-Wide level.'}
                 </p>
                 <div className="text-xs text-gray-500 space-y-1">
                   <div>
-                    {lang === 'fr' ? '✓ Émergence bottom-up' : '✓ Bottom-up emergence'}
+                    {lang === 'fr' ? '• Émergence bottom-up' : '• Bottom-up emergence'}
                   </div>
                   <div>
-                    {lang === 'fr' ? '✓ Validé par Comité Domaine' : '✓ Validated by Domain Committee'}
+                    {lang === 'fr' ? '• Validé par Comité Domaine' : '• Validated by Domain Committee'}
                   </div>
                   <div>
-                    {lang === 'fr' ? '✓ Promotion au niveau Bank-Wide' : '✓ Promotion to Bank-Wide level'}
+                    {lang === 'fr' ? '• Promotion au niveau Bank-Wide' : '• Promotion to Bank-Wide level'}
                   </div>
                 </div>
               </div>
 
               {/* Flow 2 */}
               <div className="bg-gray-50 rounded border border-gray-300 p-6">
-                <div className="text-2xl font-semibold mb-2 text-purple-600">Flow 2</div>
+                <div className="text-2xl font-semibold mb-2 text-gray-900">Flow 2</div>
                 <h3 className="text-lg font-semibold mb-3 text-gray-900">
                   {lang === 'fr' ? 'Top-Down (Équipes Transversales)' : 'Top-Down (Cross-cutting Teams)'}
                 </h3>
@@ -126,20 +126,20 @@ export default async function HomePage({
                 </p>
                 <div className="text-xs text-gray-500 space-y-1">
                   <div>
-                    {lang === 'fr' ? '✓ Standards d\'entreprise' : '✓ Enterprise standards'}
+                    {lang === 'fr' ? '• Standards d\'entreprise' : '• Enterprise standards'}
                   </div>
                   <div>
-                    {lang === 'fr' ? '✓ Créés directement Bank-Wide' : '✓ Created directly Bank-Wide'}
+                    {lang === 'fr' ? '• Créés directement Bank-Wide' : '• Created directly Bank-Wide'}
                   </div>
                   <div>
-                    {lang === 'fr' ? '✓ Gouvernance centralisée' : '✓ Centralized governance'}
+                    {lang === 'fr' ? '• Gouvernance centralisée' : '• Centralized governance'}
                   </div>
                 </div>
               </div>
 
               {/* Flow 3 */}
               <div className="bg-gray-50 rounded border border-gray-300 p-6">
-                <div className="text-2xl font-semibold mb-2 text-amber-600">Flow 3</div>
+                <div className="text-2xl font-semibold mb-2 text-gray-900">Flow 3</div>
                 <h3 className="text-lg font-semibold mb-3 text-gray-900">
                   {lang === 'fr' ? 'Bootstrap (Transitoire)' : 'Bootstrap (Transitional)'}
                 </h3>
@@ -150,32 +150,32 @@ export default async function HomePage({
                 </p>
                 <div className="text-xs text-gray-500 space-y-1">
                   <div>
-                    {lang === 'fr' ? '✓ Démarrage rapide' : '✓ Quick start'}
+                    {lang === 'fr' ? '• Démarrage rapide' : '• Quick start'}
                   </div>
                   <div>
-                    {lang === 'fr' ? '✓ Patterns existants critiques' : '✓ Existing critical patterns'}
+                    {lang === 'fr' ? '• Patterns existants critiques' : '• Existing critical patterns'}
                   </div>
                   <div>
-                    {lang === 'fr' ? '✓ Phase transitoire' : '✓ Transitional phase'}
+                    {lang === 'fr' ? '• Phase transitoire' : '• Transitional phase'}
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Governance */}
-            <div className="bg-blue-50 rounded border border-blue-200 p-6">
+            <div className="bg-gray-50 rounded border border-gray-300 p-6">
               <h3 className="text-lg font-semibold mb-4 text-gray-900 text-center">
                 {lang === 'fr' ? 'Gouvernance à Deux Niveaux' : 'Two-Tier Governance'}
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <h4 className="font-semibold text-gray-900 mb-2">
-                    {lang === 'fr' ? '🔵 Comités de Gouvernance par Domaine' : '🔵 Domain Governance Committees'}
+                    {lang === 'fr' ? 'Comités de Gouvernance par Domaine' : 'Domain Governance Committees'}
                   </h4>
                   <p className="text-sm text-gray-600 mb-2">
                     {lang === 'fr'
-                      ? '3-5 architectes par domaine (Particuliers, Entreprises, Gestion de Patrimoine)'
-                      : '3-5 architects per domain (Retail, Corporate, Wealth Management)'}
+                      ? '3-5 architectes de solutions par domaine (Particuliers, Entreprises, Gestion de Patrimoine)'
+                      : '3-5 solution architects per domain (Retail, Corporate, Wealth Management)'}
                   </p>
                   <p className="text-xs text-gray-500">
                     {lang === 'fr'
@@ -185,7 +185,7 @@ export default async function HomePage({
                 </div>
                 <div>
                   <h4 className="font-semibold text-gray-900 mb-2">
-                    {lang === 'fr' ? '🟣 Comité de Gouvernance Architectes Experts' : '🟣 Expert Architects Governance Committee'}
+                    {lang === 'fr' ? 'Comité de Gouvernance Architectes Experts' : 'Expert Architects Governance Committee'}
                   </h4>
                   <p className="text-sm text-gray-600 mb-2">
                     {lang === 'fr' ? '5-7 architectes experts' : '5-7 expert architects'}
@@ -200,7 +200,7 @@ export default async function HomePage({
               <div className="mt-4 text-center">
                 <Link
                   href={`/${lang}/guides/08-governance`}
-                  className="text-sm text-blue-700 hover:text-blue-900 font-medium underline"
+                  className="text-sm text-gray-700 hover:text-gray-900 font-medium underline"
                 >
                   {lang === 'fr' ? 'En savoir plus sur la gouvernance →' : 'Learn more about governance →'}
                 </Link>
