@@ -5,6 +5,11 @@ const withMDX = createMDX();
 /** @type {import('next').NextConfig} */
 const config = {
   reactStrictMode: true,
+  experimental: {
+    turbopack: {
+      root: '.',
+    },
+  },
 };
 
 export default withMDX(config);

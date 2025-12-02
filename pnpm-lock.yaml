@@ -30,7 +30,7 @@ importers:
         version: 11.12.1
       next:
         specifier: 16.0.1
-        version: 16.0.1(react-dom@19.2.0)(react@19.2.0)
+        version: 16.0.1(@playwright/test@1.57.0)(react-dom@19.2.0)(react@19.2.0)
       next-themes:
         specifier: ^0.4.6
         version: 0.4.6(react-dom@19.2.0)(react@19.2.0)
@@ -41,6 +41,9 @@ importers:
         specifier: ^19.2.0
         version: 19.2.0(react@19.2.0)
     devDependencies:
+      '@playwright/test':
+        specifier: ^1.57.0
+        version: 1.57.0
       '@tailwindcss/postcss':
         specifier: ^4.1.16
         version: 4.1.17
@@ -781,6 +784,13 @@ packages:
     resolution: {integrity: sha512-scSmQBD8eANlMUOglxHrN1JdSW8tDghsPuS83otqealBiIeMukCQMOf/wc0JJjDXomqwNdEQFLXLGHrU6PGxuA==}
     engines: {node: '>= 20.0.0'}
     dev: false
+
+  /@playwright/test@1.57.0:
+    resolution: {integrity: sha512-6TyEnHgd6SArQO8UO2OMTxshln3QMWBtPGrOCgs3wVEmQmwyuNtB10IZMfmYDE0riwNR1cu4q+pPcxMVtaG3TA==}
+    engines: {node: '>=18'}
+    hasBin: true
+    dependencies:
+      playwright: 1.57.0
 
   /@radix-ui/number@1.1.1:
     resolution: {integrity: sha512-MkKCwxlXTgz6CFoJx3pCwn07GKp36+aZyu/u2Ln2VrA5DcdyCZkASEDBTd8x5whTQQL5CiYf4prXKLcgQdv29g==}
@@ -2555,6 +2565,13 @@ packages:
       picomatch: 4.0.3
     dev: false
 
+  /fsevents@2.3.2:
+    resolution: {integrity: sha512-xiqMQR4xAeHTuB9uWm+fFRcIOgKBMiOBP+eXiyT7jsgVCq1bkVygt00oASowB7EdtpOHaaPgKt812P9ab+DDKA==}
+    engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
+    os: [darwin]
+    requiresBuild: true
+    optional: true
+
   /fumadocs-core@16.1.0(@types/react@19.2.7)(lucide-react@0.552.0)(next@16.0.1)(react-dom@19.2.0)(react@19.2.0):
     resolution: {integrity: sha512-5pbO2bOGc/xlb2yLQSy6Oag8mvD5CNf5HzQIG80HjZzLXYWEOHW8yovRKnWKRF9gAibn6WHnbssj3YPAlitV/A==}
     peerDependencies:
@@ -2605,7 +2622,7 @@ packages:
       image-size: 2.0.2
       lucide-react: 0.552.0(react@19.2.0)
       negotiator: 1.0.0
-      next: 16.0.1(react-dom@19.2.0)(react@19.2.0)
+      next: 16.0.1(@playwright/test@1.57.0)(react-dom@19.2.0)(react@19.2.0)
       npm-to-yarn: 3.0.1
       path-to-regexp: 8.3.0
       react: 19.2.0
@@ -2648,7 +2665,7 @@ packages:
       js-yaml: 4.1.1
       lru-cache: 11.2.2
       mdast-util-to-markdown: 2.1.2
-      next: 16.0.1(react-dom@19.2.0)(react@19.2.0)
+      next: 16.0.1(@playwright/test@1.57.0)(react-dom@19.2.0)(react@19.2.0)
       picocolors: 1.1.1
       picomatch: 4.0.3
       react: 19.2.0
@@ -2694,7 +2711,7 @@ packages:
       class-variance-authority: 0.7.1
       fumadocs-core: 16.1.0(@types/react@19.2.7)(lucide-react@0.552.0)(next@16.0.1)(react-dom@19.2.0)(react@19.2.0)
       lodash.merge: 4.6.2
-      next: 16.0.1(react-dom@19.2.0)(react@19.2.0)
+      next: 16.0.1(@playwright/test@1.57.0)(react-dom@19.2.0)(react@19.2.0)
       next-themes: 0.4.6(react-dom@19.2.0)(react@19.2.0)
       postcss-selector-parser: 7.1.1
       react: 19.2.0
@@ -3652,7 +3669,7 @@ packages:
       react-dom: 19.2.0(react@19.2.0)
     dev: false
 
-  /next@16.0.1(react-dom@19.2.0)(react@19.2.0):
+  /next@16.0.1(@playwright/test@1.57.0)(react-dom@19.2.0)(react@19.2.0):
     resolution: {integrity: sha512-e9RLSssZwd35p7/vOa+hoDFggUZIUbZhIUSLZuETCwrCVvxOs87NamoUzT+vbcNAL8Ld9GobBnWOA6SbV/arOw==}
     engines: {node: '>=20.9.0'}
     hasBin: true
@@ -3674,6 +3691,7 @@ packages:
         optional: true
     dependencies:
       '@next/env': 16.0.1
+      '@playwright/test': 1.57.0
       '@swc/helpers': 0.5.15
       caniuse-lite: 1.0.30001757
       postcss: 8.4.31
@@ -3755,6 +3773,20 @@ packages:
       mlly: 1.8.0
       pathe: 2.0.3
     dev: false
+
+  /playwright-core@1.57.0:
+    resolution: {integrity: sha512-agTcKlMw/mjBWOnD6kFZttAAGHgi/Nw0CZ2o6JqWSbMlI219lAFLZZCyqByTsvVAJq5XA5H8cA6PrvBRpBWEuQ==}
+    engines: {node: '>=18'}
+    hasBin: true
+
+  /playwright@1.57.0:
+    resolution: {integrity: sha512-ilYQj1s8sr2ppEJ2YVadYBN0Mb3mdo9J0wQ+UuDhzYqURwSoW4n1Xs5vs7ORwgDGmyEh33tRMeS8KhdkMoLXQw==}
+    engines: {node: '>=18'}
+    hasBin: true
+    dependencies:
+      playwright-core: 1.57.0
+    optionalDependencies:
+      fsevents: 2.3.2
 
   /points-on-curve@0.2.0:
     resolution: {integrity: sha512-0mYKnYYe9ZcqMCWhUjItv/oHjvgEsfKvnUTg8sAtnHr3GVy7rGkXCb6d5cSyqrWqL4k81b9CPg3urd+T7aop3A==}

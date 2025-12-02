@@ -1,0 +1,72 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - main [ref=e2]:
+    - generic "Main" [ref=e3]:
+      - navigation [ref=e5]:
+        - link "Banque Nationale PROVEN REUSABLE ARCHITECTURE" [active] [ref=e6] [cursor=pointer]:
+          - /url: /fr
+          - generic [ref=e7]:
+            - img "Banque Nationale" [ref=e8]
+            - generic [ref=e9]: PROVEN REUSABLE ARCHITECTURE
+        - generic [ref=e10]:
+          - link "Switch to English" [ref=e11] [cursor=pointer]:
+            - /url: /en
+            - text: EN
+          - link "Switch to Français" [ref=e12] [cursor=pointer]:
+            - /url: /fr
+            - text: FR
+        - list [ref=e13]:
+          - listitem [ref=e14]:
+            - link "Accueil" [ref=e15] [cursor=pointer]:
+              - /url: /fr
+          - listitem [ref=e16]:
+            - link "Catalogue" [ref=e17] [cursor=pointer]:
+              - /url: /fr/catalogue
+          - listitem [ref=e18]:
+            - link "Librairie" [ref=e19] [cursor=pointer]:
+              - /url: /fr/registre
+        - button "Search Ctrl K" [ref=e21]:
+          - img [ref=e22]
+          - text: Search
+          - generic [ref=e25]:
+            - generic [ref=e26]: Ctrl
+            - generic [ref=e27]: K
+    - main [ref=e28]:
+      - generic [ref=e31]:
+        - heading "Registre PRA" [level=1] [ref=e32]
+        - heading "Banque Nationale du Canada" [level=2] [ref=e33]
+        - paragraph [ref=e34]: Proven Reusable Architecture
+        - paragraph [ref=e35]: Bibliothèque d'architectures validées en production pour accélérer vos projets avec qualité et cohérence
+        - generic [ref=e36]:
+          - link "Explorer le Registre" [ref=e37] [cursor=pointer]:
+            - /url: /fr/registre
+          - link "Guide de Démarrage" [ref=e38] [cursor=pointer]:
+            - /url: /fr/registre/01-getting-started
+      - generic [ref=e41]:
+        - generic [ref=e42]:
+          - generic [ref=e43]: "0"
+          - generic [ref=e44]: PRAs Approuvés
+          - generic [ref=e45]: Validés en production (3+ implémentations)
+        - generic [ref=e46]:
+          - generic [ref=e47]: "17"
+          - generic [ref=e48]: PRAs Candidats
+          - generic [ref=e49]: En cours de validation (1+ implémentation)
+        - generic [ref=e50]:
+          - generic [ref=e51]: 40+
+          - generic [ref=e52]: PRAs Validés
+          - generic [ref=e53]: Patterns éprouvés en production
+      - generic [ref=e55]:
+        - heading "Contribuez au Registre" [level=2] [ref=e56]
+        - paragraph [ref=e57]: Vous avez une architecture validée en production ? Partagez-la avec la communauté.
+        - paragraph [ref=e58]: Rejoignez 45+ architectes contributeurs
+        - generic [ref=e59]:
+          - link "Guide de Contribution" [ref=e60] [cursor=pointer]:
+            - /url: /fr/registre/06-contributing
+          - link "Gouvernance" [ref=e61] [cursor=pointer]:
+            - /url: /fr/registre/08-governance
+  - button "Open Next.js Dev Tools" [ref=e67] [cursor=pointer]:
+    - img [ref=e68]
+  - alert [ref=e71]
+```

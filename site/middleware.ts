@@ -5,8 +5,12 @@ import { defaultLanguage, isValidLanguage } from './lib/i18n';
 export function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
-  // Check if pathname starts with a language
-  const pathnameHasLang = pathname.startsWith('/en/') || pathname.startsWith('/fr/');
+  // Check if pathname has a valid language prefix
+  const pathnameHasLang =
+    pathname === '/en' ||
+    pathname === '/fr' ||
+    pathname.startsWith('/en/') ||
+    pathname.startsWith('/fr/');
 
   // Redirect root to default language
   if (pathname === '/') {
