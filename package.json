@@ -1,0 +1,33 @@
+{
+  "name": "pra-registry",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Registre des Patrons Réutilisables d'Architecture (PRA)",
+  "keywords": [
+    "architecture",
+    "patterns",
+    "pra",
+    "documentation",
+    "proven-in-use"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/org/pra-registry.git"
+  },
+  "license": "MIT",
+  "author": "Équipe Initiative PRA",
+  "scripts": {
+    "dev": "pnpm --filter site dev",
+    "build": "pnpm --filter site build",
+    "start": "pnpm --filter site start",
+    "lint": "pnpm --filter site lint",
+    "type-check": "pnpm --filter site type-check",
+    "validate": "./scripts/validate-metadata.sh"
+  },
+  "devDependencies": {},
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "packageManager": "pnpm@8.15.0"
+}

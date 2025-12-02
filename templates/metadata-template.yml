@@ -1,0 +1,93 @@
+# Template YAML Frontmatter pour PRA
+# Ce fichier montre la structure attendue des métadonnées YAML dans l'en-tête de chaque PRA
+
+---
+# === IDENTIFICATION ===
+id: pra-XXX                           # Format: pra-001, pra-002, etc.
+name: "Nom Complet du PRA"            # Nom descriptif et unique
+category: tech                        # tech | integration | security | business
+
+# === CLASSIFICATION ===
+tags:                                 # 3-10 tags recommandés
+  - tag-principal-1
+  - tag-principal-2
+  - technologie-clé
+  - domaine-métier
+  - pattern-type
+
+# === STATUT ===
+status: candidate                     # candidate | approved | deprecated
+version: 1.0.0                        # Semantic versioning (MAJOR.MINOR.PATCH)
+
+# === RESPONSABILITÉS ===
+author:
+  name: "Prénom Nom"
+  email: "prenom.nom@example.com"
+
+maintainer:
+  name: "Prénom Nom"                  # Peut être différent de l'auteur
+  email: "prenom.nom@example.com"
+
+# === DATES ===
+created: 2025-11-28                   # Date de création (YYYY-MM-DD)
+updated: 2025-11-28                   # Dernière mise à jour (YYYY-MM-DD)
+
+# === VALIDATION (PROVEN-IN-USE) ===
+# IMPORTANT: 3+ implémentations documentées requises pour status: approved
+proven_in_use:
+  - project: "Nom du Projet 1"
+    team: "Nom de l'Équipe"
+    date: "2024-06-15"                # Date de mise en production (YYYY-MM-DD)
+    feedback: "Retour d'expérience concret et quantifié"
+
+  - project: "Nom du Projet 2"
+    team: "Nom de l'Équipe"
+    date: "2024-09-10"
+    feedback: "Résultats mesurables obtenus"
+
+  - project: "Nom du Projet 3"
+    team: "Nom de l'Équipe"
+    date: "2025-01-20"
+    feedback: "Impact business/technique démontré"
+
+# Pour PRA candidat (status: candidate), laisser vide :
+# proven_in_use: []
+
+# === DÉPENDANCES ===
+dependencies: []                      # IDs d'autres PRA requis
+  # - pra-001
+  # - pra-042
+
+# === CYCLE DE VIE ===
+replaces: null                        # ID du PRA remplacé (si dépréciation)
+  # replaces: pra-025
+
+replaced_by: null                     # ID du PRA de remplacement (si déprécié)
+  # replaced_by: pra-150
+
+# === MÉTADONNÉES SUPPLÉMENTAIRES (OPTIONNELLES) ===
+
+# Niveau de maturité (optionnel)
+maturity: stable                      # experimental | stable | mature | legacy
+
+# Complexité d'implémentation (optionnel)
+complexity: medium                    # low | medium | high
+
+# Effort estimé (optionnel)
+effort:
+  initial: "2-4 semaines"             # Temps de mise en place initiale
+  ongoing: "2h/mois"                  # Maintenance continue
+
+# Domaines d'application (optionnel)
+domains:
+  - backend
+  - infrastructure
+  - ci-cd
+
+# Stack technique principale (optionnel)
+tech_stack:
+  - kubernetes
+  - argocd
+  - azure-devops
+
+---
