@@ -1,13 +1,29 @@
-import { docs } from 'fumadocs-mdx:collections/server';
+import { docs, docs_en, docs_fr } from 'fumadocs-mdx:collections/server';
 import { type InferPageType, loader } from 'fumadocs-core/source';
 import { lucideIconsPlugin } from 'fumadocs-core/source/lucide-icons';
+import type { Language } from './i18n';
 
-// See https://fumadocs.dev/docs/headless/source-api for more info
-export const source = loader({
-  baseUrl: '/registre',
-  source: docs.toFumadocsSource(),
-  plugins: [lucideIconsPlugin()],
-});
+// Language-specific sources
+const sources = {
+  en: loader({
+    baseUrl: '/en/registre',
+    source: docs_en.toFumadocsSource(),
+    plugins: [lucideIconsPlugin()],
+  }),
+  fr: loader({
+    baseUrl: '/fr/registre',
+    source: docs_fr.toFumadocsSource(),
+    plugins: [lucideIconsPlugin()],
+  }),
+};
+
+// Get source by language
+export function getSource(locale: Language) {
+  return sources[locale] || sources.fr;
+}
+
+// Default source (backward compatibility)
+export const source = sources.fr;
 
 export function getPageImage(page: InferPageType<typeof source>) {
   const segments = [...page.slugs, 'image.png'];

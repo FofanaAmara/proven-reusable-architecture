@@ -1,0 +1,10 @@
+{
+  "title": "Transversal",
+  "description": "Proven Reusable Architectures applicables à tous les secteurs",
+  "pages": [
+    "tech",
+    "integration",
+    "security",
+    "business"
+  ]
+}
