@@ -10,8 +10,8 @@ test.describe('Internationalization (i18n)', () => {
     await page.goto('/fr');
 
     // Check French content
-    await expect(page.locator('h1')).toContainText('Registre PRA');
-    await expect(page.locator('h2')).toContainText('Banque Nationale du Canada');
+    await expect(page.locator('h1').first()).toContainText('Registre PRA');
+    await expect(page.locator('h2').first()).toContainText('Banque Nationale du Canada');
 
     // Check French navigation
     await expect(page.getByRole('link', { name: 'Accueil' })).toBeVisible();
@@ -23,8 +23,8 @@ test.describe('Internationalization (i18n)', () => {
     await page.goto('/en');
 
     // Check English content
-    await expect(page.locator('h1')).toContainText('PRA Registry');
-    await expect(page.locator('h2')).toContainText('Banque Nationale du Canada');
+    await expect(page.locator('h1').first()).toContainText('PRA Registry');
+    await expect(page.locator('h2').first()).toContainText('Banque Nationale du Canada');
 
     // Check English navigation
     await expect(page.getByRole('link', { name: 'Home' })).toBeVisible();
@@ -35,19 +35,23 @@ test.describe('Internationalization (i18n)', () => {
   test('should have language switcher visible', async ({ page }) => {
     await page.goto('/fr');
 
-    // Check for FR and EN buttons
-    const frButton = page.locator('a[aria-label*="Français"]').or(page.locator('text=FR'));
-    const enButton = page.locator('a[aria-label*="English"]').or(page.locator('text=EN'));
+    // Check for FR and EN buttons (use more specific selectors)
+    const frButton = page.getByRole('link', { name: /Switch to Français/i }).or(
+      page.locator('a[href*="/fr"]').filter({ hasText: 'FR' })
+    );
+    const enButton = page.getByRole('link', { name: /Switch to English/i }).or(
+      page.locator('a[href*="/en"]').filter({ hasText: 'EN' })
+    );
 
-    await expect(frButton).toBeVisible();
-    await expect(enButton).toBeVisible();
+    await expect(frButton.first()).toBeVisible();
+    await expect(enButton.first()).toBeVisible();
   });
 
   test('should switch from French to English using language switcher', async ({ page }) => {
     await page.goto('/fr');
 
-    // Click English button
-    await page.click('text=EN');
+    // Click English button - use the link with aria-label
+    await page.getByRole('link', { name: 'Switch to English' }).click();
 
     // Should redirect to /en
     await expect(page).toHaveURL('/en');
@@ -59,8 +63,8 @@ test.describe('Internationalization (i18n)', () => {
   test('should switch from English to French using language switcher', async ({ page }) => {
     await page.goto('/en');
 
-    // Click French button
-    await page.click('text=FR');
+    // Click French button - use the link with aria-label
+    await page.getByRole('link', { name: 'Switch to Français' }).click();
 
     // Should redirect to /fr
     await expect(page).toHaveURL('/fr');
@@ -75,7 +79,7 @@ test.describe('Internationalization (i18n)', () => {
     await expect(page).toHaveURL('/fr/catalogue');
 
     // Switch to English
-    await page.click('text=EN');
+    await page.getByRole('link', { name: 'Switch to English' }).click();
 
     // Should be on English catalogue
     await expect(page).toHaveURL('/en/catalogue');

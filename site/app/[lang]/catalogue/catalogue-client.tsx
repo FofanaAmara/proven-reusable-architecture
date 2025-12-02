@@ -5,6 +5,88 @@ import Link from 'next/link';
 import { create, search, insertMultiple } from '@orama/orama';
 import { type Language } from '@/lib/i18n';
 
+// Translation helper
+const translations = {
+  fr: {
+    title: 'Catalogue des PRAs',
+    found: (count: number) => `${count} PRA${count > 1 ? 's' : ''} trouvé${count > 1 ? 's' : ''}`,
+    searchPlaceholder: 'Rechercher par nom, description, tags...',
+    showFilters: 'Afficher les filtres',
+    hideFilters: 'Masquer les filtres',
+    scope: 'Scope',
+    secteur: 'Secteur',
+    category: 'Catégorie',
+    status: 'Statut',
+    all: 'Tous',
+    allFeminine: 'Toutes',
+    transversal: 'Transversal',
+    secteurs: 'Secteurs',
+    enPromotion: 'En Promotion',
+    particuliers: 'Particuliers',
+    entreprises: 'Entreprises',
+    gestionPatrimoine: 'Gestion de Patrimoine',
+    tech: 'Tech',
+    integration: 'Integration',
+    security: 'Security',
+    business: 'Business',
+    approved: 'Approved',
+    candidate: 'Candidate',
+    deprecated: 'Deprecated',
+    name: 'Nom',
+    description: 'Description',
+    proven: 'Proven',
+    noResults: 'Aucun PRA trouvé avec ces critères',
+    page: 'Page',
+    of: 'sur',
+    results: (count: number) => `${count} résultat${count > 1 ? 's' : ''}`,
+    previous: 'Précédent',
+    next: 'Suivant',
+    helpTitle: 'Aide',
+    helpFilter: 'Utilisez les filtres pour affiner votre recherche par scope, secteur, catégorie ou statut',
+    helpSort: 'Cliquez sur les en-têtes de colonnes pour trier les résultats',
+    helpClick: 'Cliquez sur une ligne pour accéder à la documentation complète du PRA',
+  },
+  en: {
+    title: 'PRA Catalogue',
+    found: (count: number) => `${count} PRA${count > 1 ? 's' : ''} found`,
+    searchPlaceholder: 'Search by name, description, tags...',
+    showFilters: 'Show filters',
+    hideFilters: 'Hide filters',
+    scope: 'Scope',
+    secteur: 'Sector',
+    category: 'Category',
+    status: 'Status',
+    all: 'All',
+    allFeminine: 'All',
+    transversal: 'Transversal',
+    secteurs: 'Sectors',
+    enPromotion: 'In Promotion',
+    particuliers: 'Retail',
+    entreprises: 'Corporate',
+    gestionPatrimoine: 'Wealth Management',
+    tech: 'Tech',
+    integration: 'Integration',
+    security: 'Security',
+    business: 'Business',
+    approved: 'Approved',
+    candidate: 'Candidate',
+    deprecated: 'Deprecated',
+    name: 'Name',
+    description: 'Description',
+    proven: 'Proven',
+    noResults: 'No PRA found with these criteria',
+    page: 'Page',
+    of: 'of',
+    results: (count: number) => `${count} result${count > 1 ? 's' : ''}`,
+    previous: 'Previous',
+    next: 'Next',
+    helpTitle: 'Help',
+    helpFilter: 'Use filters to refine your search by scope, sector, category or status',
+    helpSort: 'Click on column headers to sort results',
+    helpClick: 'Click on a row to access the complete PRA documentation',
+  },
+};
+
 interface PRARow {
   slug: string;
   name: string;
@@ -54,6 +136,7 @@ const SECTEUR_LABELS: Record<Exclude<Secteur, 'all'>, string> = {
 };
 
 export default function CatalogueClient({ pras, lang }: { pras: PRARow[]; lang: Language }) {
+  const t = translations[lang];
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<Category>('all');
   const [statusFilter, setStatusFilter] = useState<Status>('all');
@@ -249,17 +332,17 @@ export default function CatalogueClient({ pras, lang }: { pras: PRARow[]; lang: 
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-4 pb-4 border-b border-gray-200">
-          <h1 className="text-2xl font-semibold text-gray-900 mb-1">Catalogue des PRAs</h1>
+          <h1 className="text-2xl font-semibold text-gray-900 mb-1">{t.title}</h1>
           <p className="text-sm text-gray-600">
-            {filteredAndSortedPRAs.length} PRA{filteredAndSortedPRAs.length > 1 ? 's' : ''} trouvé{filteredAndSortedPRAs.length > 1 ? 's' : ''}
+            {t.found(filteredAndSortedPRAs.length)}
           </p>
         </div>
 
         {/* Search Bar - Central */}
         <div className="max-w-2xl mx-auto mb-4">
           <input
-            type="text"
-            placeholder="Rechercher par nom, description, tags..."
+            type="search"
+            placeholder={t.searchPlaceholder}
             value={searchQuery}
             onChange={(e) => {
               setSearchQuery(e.target.value);
@@ -275,7 +358,7 @@ export default function CatalogueClient({ pras, lang }: { pras: PRARow[]; lang: 
             onClick={() => setShowFilters(!showFilters)}
             className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 flex items-center gap-2"
           >
-            {showFilters ? 'Masquer les filtres' : 'Afficher les filtres'}
+            {showFilters ? t.hideFilters : t.showFilters}
             <span className="text-gray-500">{showFilters ? '▲' : '▼'}</span>
           </button>
         </div>
@@ -286,7 +369,7 @@ export default function CatalogueClient({ pras, lang }: { pras: PRARow[]; lang: 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {/* Scope Filter */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Scope</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t.scope}</label>
               <select
                 value={scopeFilter}
                 onChange={(e) => {
@@ -296,17 +379,17 @@ export default function CatalogueClient({ pras, lang }: { pras: PRARow[]; lang: 
                 }}
                 className="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400"
               >
-                <option value="all">Tous</option>
-                <option value="transversal">Transversal</option>
-                <option value="secteurs">Secteurs</option>
-                <option value="en-promotion">En Promotion</option>
+                <option value="all">{t.all}</option>
+                <option value="transversal">{t.transversal}</option>
+                <option value="secteurs">{t.secteurs}</option>
+                <option value="en-promotion">{t.enPromotion}</option>
               </select>
             </div>
 
             {/* Secteur Filter (only if scope = secteurs) */}
             {scopeFilter === 'secteurs' && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Secteur</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t.secteur}</label>
                 <select
                   value={secteurFilter}
                   onChange={(e) => {
@@ -315,10 +398,10 @@ export default function CatalogueClient({ pras, lang }: { pras: PRARow[]; lang: 
                   }}
                   className="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400"
                 >
-                  <option value="all">Tous</option>
+                  <option value="all">{t.all}</option>
                   {availableSecteurs.map((secteur) => (
                     <option key={secteur} value={secteur}>
-                      {SECTEUR_LABELS[secteur as Exclude<Secteur, 'all'>] || secteur}
+                      {t[secteur as keyof typeof t] || secteur}
                     </option>
                   ))}
                 </select>
@@ -327,7 +410,7 @@ export default function CatalogueClient({ pras, lang }: { pras: PRARow[]; lang: 
 
             {/* Category Filter */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Catégorie</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t.category}</label>
               <select
                 value={categoryFilter}
                 onChange={(e) => {
@@ -336,17 +419,17 @@ export default function CatalogueClient({ pras, lang }: { pras: PRARow[]; lang: 
                 }}
                 className="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400"
               >
-                <option value="all">Toutes</option>
-                <option value="tech">Tech</option>
-                <option value="integration">Integration</option>
-                <option value="security">Security</option>
-                <option value="business">Business</option>
+                <option value="all">{t.allFeminine}</option>
+                <option value="tech">{t.tech}</option>
+                <option value="integration">{t.integration}</option>
+                <option value="security">{t.security}</option>
+                <option value="business">{t.business}</option>
               </select>
             </div>
 
             {/* Status Filter */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Statut</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t.status}</label>
               <select
                 value={statusFilter}
                 onChange={(e) => {
@@ -355,10 +438,10 @@ export default function CatalogueClient({ pras, lang }: { pras: PRARow[]; lang: 
                 }}
                 className="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400"
               >
-                <option value="all">Tous</option>
-                <option value="approved">Approved</option>
-                <option value="candidate">Candidate</option>
-                <option value="deprecated">Deprecated</option>
+                <option value="all">{t.all}</option>
+                <option value="approved">{t.approved}</option>
+                <option value="candidate">{t.candidate}</option>
+                <option value="deprecated">{t.deprecated}</option>
               </select>
             </div>
             </div>
@@ -376,31 +459,31 @@ export default function CatalogueClient({ pras, lang }: { pras: PRARow[]; lang: 
                     onClick={() => handleSort('name')}
                   >
                     <div className="flex items-center gap-1">
-                      Nom
+                      {t.name}
                       {sortKey === 'name' && <span className="text-gray-500">{sortDirection === 'asc' ? '↑' : '↓'}</span>}
                     </div>
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                    Description
+                    {t.description}
                   </th>
                   <th
                     className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                     onClick={() => handleSort('scope')}
                   >
                     <div className="flex items-center gap-1">
-                      Scope
+                      {t.scope}
                       {sortKey === 'scope' && <span className="text-gray-500">{sortDirection === 'asc' ? '↑' : '↓'}</span>}
                     </div>
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                    Secteur
+                    {t.secteur}
                   </th>
                   <th
                     className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                     onClick={() => handleSort('category')}
                   >
                     <div className="flex items-center gap-1">
-                      Catégorie
+                      {t.category}
                       {sortKey === 'category' && <span className="text-gray-500">{sortDirection === 'asc' ? '↑' : '↓'}</span>}
                     </div>
                   </th>
@@ -409,12 +492,12 @@ export default function CatalogueClient({ pras, lang }: { pras: PRARow[]; lang: 
                     onClick={() => handleSort('status')}
                   >
                     <div className="flex items-center gap-1">
-                      Statut
+                      {t.status}
                       {sortKey === 'status' && <span className="text-gray-500">{sortDirection === 'asc' ? '↑' : '↓'}</span>}
                     </div>
                   </th>
                   <th className="px-6 py-3 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                    Proven
+                    {t.proven}
                   </th>
                 </tr>
               </thead>
@@ -422,7 +505,7 @@ export default function CatalogueClient({ pras, lang }: { pras: PRARow[]; lang: 
                 {paginatedPRAs.length === 0 ? (
                   <tr>
                     <td colSpan={7} className="px-6 py-12 text-center text-gray-500 text-sm">
-                      Aucun PRA trouvé avec ces critères
+                      {t.noResults}
                     </td>
                   </tr>
                 ) : (
@@ -457,7 +540,7 @@ export default function CatalogueClient({ pras, lang }: { pras: PRARow[]; lang: 
         {totalPages > 1 && (
           <div className="flex items-center justify-between border-t border-gray-300 bg-white px-6 py-4 rounded">
             <div className="text-sm text-gray-600">
-              Page {currentPage} sur {totalPages} · {filteredAndSortedPRAs.length} résultat{filteredAndSortedPRAs.length > 1 ? 's' : ''}
+              {t.page} {currentPage} {t.of} {totalPages} · {t.results(filteredAndSortedPRAs.length)}
             </div>
             <div className="flex gap-2">
               <button
@@ -465,14 +548,14 @@ export default function CatalogueClient({ pras, lang }: { pras: PRARow[]; lang: 
                 disabled={currentPage === 1}
                 className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Précédent
+                {t.previous}
               </button>
               <button
                 onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                 disabled={currentPage === totalPages}
                 className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Suivant
+                {t.next}
               </button>
             </div>
           </div>
@@ -480,11 +563,11 @@ export default function CatalogueClient({ pras, lang }: { pras: PRARow[]; lang: 
 
         {/* Help Section */}
         <div className="mt-8 bg-gray-50 border border-gray-300 rounded p-6">
-          <h3 className="text-sm font-semibold text-gray-900 mb-3">Aide</h3>
+          <h3 className="text-sm font-semibold text-gray-900 mb-3">{t.helpTitle}</h3>
           <ul className="text-sm text-gray-600 space-y-1.5">
-            <li>Utilisez les filtres pour affiner votre recherche par scope, secteur, catégorie ou statut</li>
-            <li>Cliquez sur les en-têtes de colonnes pour trier les résultats</li>
-            <li>Cliquez sur une ligne pour accéder à la documentation complète du PRA</li>
+            <li>{t.helpFilter}</li>
+            <li>{t.helpSort}</li>
+            <li>{t.helpClick}</li>
           </ul>
         </div>
       </div>
