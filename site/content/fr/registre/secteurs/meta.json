@@ -1,6 +1,6 @@
 {
-  "title": "Secteurs",
-  "description": "Proven Reusable Architectures spécifiques aux secteurs métier",
+  "title": "PRAs par Domaine",
+  "description": "Proven Reusable Architectures spécifiques aux domaines métier",
   "pages": [
     "gestion-patrimoine",
     "particuliers",

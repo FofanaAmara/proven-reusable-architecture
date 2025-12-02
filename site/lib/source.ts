@@ -41,6 +41,31 @@ export function getRegistreSource(locale: Language) {
   return registreSources[locale] || registreSources.fr;
 }
 
+// Get combined page tree (guides + registre) for unified sidebar
+export function getCombinedPageTree(locale: Language) {
+  const guideSource = getGuideSource(locale);
+  const registreSource = getRegistreSource(locale);
+
+  // Create a custom tree structure with folders
+  return {
+    name: locale === 'fr' ? 'Documentation' : 'Documentation',
+    children: [
+      {
+        type: 'folder' as const,
+        name: locale === 'fr' ? 'Guides' : 'Guides',
+        index: guideSource.pageTree[0],
+        children: guideSource.pageTree,
+      },
+      {
+        type: 'folder' as const,
+        name: locale === 'fr' ? 'Registre PRA' : 'PRA Registry',
+        index: registreSource.pageTree[0],
+        children: registreSource.pageTree,
+      },
+    ],
+  };
+}
+
 // Backward compatibility - returns registry source
 export function getSource(locale: Language) {
   return getRegistreSource(locale);

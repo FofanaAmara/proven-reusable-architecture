@@ -1,16 +1,8 @@
 {
-  "title": "Registry",
+  "title": "PRA Registry",
   "pages": [
-    "01-getting-started",
-    "02-understanding-pra",
-    "03-roles-responsibilities",
-    "04-lifecycle",
-    "05-standards",
-    "06-contributing",
-    "07-promotion-process",
-    "08-governance",
+    "index",
     "transversal",
-    "secteurs",
-    "en-promotion"
+    "secteurs"
   ]
 }

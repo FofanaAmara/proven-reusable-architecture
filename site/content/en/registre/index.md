@@ -1,5 +1,5 @@
 ---
-title: PRA Registry - National Bank
+title: Welcome
 description: Library of proven architectures to accelerate your projects with quality and consistency
 ---
 

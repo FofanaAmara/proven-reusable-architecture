@@ -1,5 +1,5 @@
 ---
-title: Registre PRA - Banque Nationale
+title: Bienvenue
 description: Bibliothèque d'architectures éprouvées pour accélérer vos projets avec qualité et cohérence
 ---
 
