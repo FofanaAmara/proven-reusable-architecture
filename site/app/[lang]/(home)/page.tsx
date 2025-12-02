@@ -31,16 +31,26 @@ export default async function HomePage({
 
             <div className="flex gap-4 justify-center flex-wrap">
               <Link
-                href={`/${lang}/registre`}
-                className="inline-flex items-center justify-center rounded border border-gray-900 bg-gray-900 px-8 py-3 text-sm font-medium text-white transition-colors hover:bg-gray-800"
+                href={`/${lang}/catalogue`}
+                className="inline-flex flex-col items-center justify-center rounded border border-gray-900 bg-gray-900 px-8 py-4 text-sm font-medium text-white transition-colors hover:bg-gray-800"
               >
-                {t(lang, 'home.explore')}
+                <span className="text-base font-semibold">{t(lang, 'home.browse')}</span>
+                <span className="text-xs text-gray-300 mt-1">{t(lang, 'home.browse.desc')}</span>
               </Link>
               <Link
-                href={`/${lang}/registre/01-getting-started`}
-                className="inline-flex items-center justify-center rounded border border-gray-300 bg-white px-8 py-3 text-sm font-medium text-gray-900 transition-colors hover:bg-gray-50"
+                href={`/${lang}/registre`}
+                className="inline-flex flex-col items-center justify-center rounded border border-gray-300 bg-white px-8 py-4 text-sm font-medium text-gray-900 transition-colors hover:bg-gray-50"
               >
-                {t(lang, 'home.getStarted')}
+                <span className="text-base font-semibold">{t(lang, 'home.registry')}</span>
+                <span className="text-xs text-gray-500 mt-1">{t(lang, 'home.registry.desc')}</span>
+              </Link>
+            </div>
+            <div className="mt-4">
+              <Link
+                href={`/${lang}/registre/01-getting-started`}
+                className="text-sm text-gray-600 hover:text-gray-900 underline"
+              >
+                {t(lang, 'home.getStarted')} →
               </Link>
             </div>
           </div>

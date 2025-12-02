@@ -24,7 +24,10 @@ export const translations: Record<Language, Record<string, string>> = {
     'home.tagline': 'Proven Reusable Architecture',
     'home.description':
       'Library of production-validated architectures to accelerate your projects with quality and consistency',
-    'home.explore': 'Explore Registry',
+    'home.browse': 'Browse PRAs',
+    'home.browse.desc': 'Quick search and filtering',
+    'home.registry': 'Explore Registry',
+    'home.registry.desc': 'Complete documentation and guides',
     'home.getStarted': 'Getting Started Guide',
     'stats.approved': 'Approved PRAs',
     'stats.approved.desc': 'Validated in production (3+ implementations)',
@@ -44,7 +47,10 @@ export const translations: Record<Language, Record<string, string>> = {
     'home.tagline': 'Proven Reusable Architecture',
     'home.description':
       "Bibliothèque d'architectures validées en production pour accélérer vos projets avec qualité et cohérence",
-    'home.explore': 'Explorer le Registre',
+    'home.browse': 'Parcourir les PRAs',
+    'home.browse.desc': 'Recherche et filtrage rapides',
+    'home.registry': 'Explorer le Registre',
+    'home.registry.desc': 'Documentation complète et guides',
     'home.getStarted': 'Guide de Démarrage',
     'stats.approved': 'PRAs Approuvés',
     'stats.approved.desc': 'Validés en production (3+ implémentations)',
