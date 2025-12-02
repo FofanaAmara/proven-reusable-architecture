@@ -109,10 +109,11 @@ Pensez aux PRA comme des **recettes de cuisine éprouvées** :
 **Besoin : "Je cherche un pattern pour mon projet"**
 
 1.  Explorez le [Catalogue](/catalogue) ou parcourez les [PRAs Bank-Wide](/registre/transversal)
-2.  Consultez les [PRAs de votre Domaine](/registre/secteurs) pour des patterns fonctionnels
-3.  Vérifiez si le contexte correspond à votre projet
-4.  Suivez le guide d'implémentation et les ADRs
-5.  Documentez votre retour d'expérience avec votre comité de gouvernance
+2.  Consultez les [PRAs de votre Domaine](/registre/secteurs) (tous types : fonctionnels ET techniques)
+3.  Si aucun pattern n'existe, créez-le et documentez-le pour votre domaine
+4.  Vérifiez si le contexte correspond à votre projet
+5.  Suivez le guide d'implémentation et les ADRs
+6.  Documentez votre retour d'expérience avec votre comité de gouvernance
 
 ### Vous êtes dans une équipe transversale ?
 

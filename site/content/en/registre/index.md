@@ -109,10 +109,11 @@ Think of PRAs as **proven cooking recipes**:
 **Need: "I'm looking for a pattern for my project"**
 
 1.  Explore the [Catalogue](/catalogue) or browse [Bank-Wide PRAs](/registre/transversal)
-2.  Check [PRAs in your Domain](/registre/secteurs) for functional patterns
-3.  Verify if the context matches your project
-4.  Follow the implementation guide and ADRs
-5.  Document your feedback with your governance committee
+2.  Check [PRAs in your Domain](/registre/secteurs) (all types: functional AND technical)
+3.  If no pattern exists, create it and document it for your domain
+4.  Verify if the context matches your project
+5.  Follow the implementation guide and ADRs
+6.  Document your feedback with your governance committee
 
 ### Are you in a cross-cutting team?
 
