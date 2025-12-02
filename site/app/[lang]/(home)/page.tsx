@@ -93,7 +93,7 @@ export default async function HomePage({
               <div className="bg-gray-50 rounded border border-gray-300 p-6">
                 <div className="text-2xl font-semibold mb-2 text-gray-900">Flow 1</div>
                 <h3 className="text-lg font-semibold mb-3 text-gray-900">
-                  {lang === 'fr' ? 'Organique (Domaine → Bank-Wide)' : 'Organic (Domain → Bank-Wide)'}
+                  {lang === 'fr' ? 'Bottom-Up (Domaine → Bank-Wide)' : 'Bottom-Up (Domain → Bank-Wide)'}
                 </h3>
                 <p className="text-sm text-gray-600 mb-4">
                   {lang === 'fr'
@@ -102,7 +102,7 @@ export default async function HomePage({
                 </p>
                 <div className="text-xs text-gray-500 space-y-1">
                   <div>
-                    {lang === 'fr' ? '• Émergence bottom-up' : '• Bottom-up emergence'}
+                    {lang === 'fr' ? '• Émergence depuis le terrain' : '• Emergence from the field'}
                   </div>
                   <div>
                     {lang === 'fr' ? '• Validé par Comité Domaine' : '• Validated by Domain Committee'}
