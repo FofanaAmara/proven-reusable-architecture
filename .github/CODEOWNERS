@@ -2,30 +2,30 @@
 # This file defines which teams are responsible for reviewing PRs in different areas
 
 # PRAs Domaine Particuliers
-/site/content/fr/registre/secteurs/particuliers/ @bnc/comite-gov-particuliers
-/site/content/en/registre/secteurs/particuliers/ @bnc/comite-gov-particuliers
+/site/content/fr/registre/secteurs/particuliers/ @KiyaliHQ/comite-gov-particuliers
+/site/content/en/registre/secteurs/particuliers/ @KiyaliHQ/comite-gov-particuliers
 
 # PRAs Domaine Entreprises
-/site/content/fr/registre/secteurs/entreprises/ @bnc/comite-gov-entreprises
-/site/content/en/registre/secteurs/entreprises/ @bnc/comite-gov-entreprises
+/site/content/fr/registre/secteurs/entreprises/ @KiyaliHQ/comite-gov-entreprises
+/site/content/en/registre/secteurs/entreprises/ @KiyaliHQ/comite-gov-entreprises
 
 # PRAs Domaine Gestion de Patrimoine
-/site/content/fr/registre/secteurs/gestion-patrimoine/ @bnc/comite-gov-patrimoine
-/site/content/en/registre/secteurs/gestion-patrimoine/ @bnc/comite-gov-patrimoine
+/site/content/fr/registre/secteurs/gestion-patrimoine/ @KiyaliHQ/comite-gov-patrimoine
+/site/content/en/registre/secteurs/gestion-patrimoine/ @KiyaliHQ/comite-gov-patrimoine
 
 # PRAs Bank-Wide (Transversal)
-/site/content/fr/registre/transversal/ @bnc/comite-architectes-experts
-/site/content/en/registre/transversal/ @bnc/comite-architectes-experts
+/site/content/fr/registre/transversal/ @KiyaliHQ/comite-architectes-experts
+/site/content/en/registre/transversal/ @KiyaliHQ/comite-architectes-experts
 
 # PRAs En Promotion (requires Expert Architects review)
-/site/content/fr/registre/en-promotion/ @bnc/comite-architectes-experts
-/site/content/en/registre/en-promotion/ @bnc/comite-architectes-experts
+/site/content/fr/registre/en-promotion/ @KiyaliHQ/comite-architectes-experts
+/site/content/en/registre/en-promotion/ @KiyaliHQ/comite-architectes-experts
 
 # Templates and Guides (Expert Architects can review)
-/templates/ @bnc/comite-architectes-experts
-/site/content/fr/guides/ @bnc/comite-architectes-experts
-/site/content/en/guides/ @bnc/comite-architectes-experts
+/templates/ @KiyaliHQ/comite-architectes-experts
+/site/content/fr/guides/ @KiyaliHQ/comite-architectes-experts
+/site/content/en/guides/ @KiyaliHQ/comite-architectes-experts
 
 # GitHub Workflows and Scripts (Expert Architects maintain)
-/.github/ @bnc/comite-architectes-experts
-/scripts/ @bnc/comite-architectes-experts
+/.github/ @KiyaliHQ/comite-architectes-experts
+/scripts/ @KiyaliHQ/comite-architectes-experts
