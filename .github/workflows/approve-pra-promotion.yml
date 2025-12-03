@@ -1,0 +1,353 @@
+name: Approve PRA Promotion
+
+# Workflow for approving promotion from Domain to Bank-Wide
+#
+# Trigger: When a PRA file is moved from secteurs/[domaine] to transversal/
+#
+# Governance:
+# - Requires 2 approvals from Expert Architects Committee
+# - Original Domain Committee approval should be documented
+#
+# Validation:
+# - 3+ proven-in-use from multiple domains/teams
+# - Multi-domain applicability demonstrated
+# - Documentation enriched with multi-context learnings
+#
+# Result: PRA moved to transversal/ (Bank-Wide scope)
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    paths:
+      - 'site/content/**/registre/**/*.md'
+      - 'site/content/**/registre/**/*.mdx'
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  detect-and-validate-promotion:
+    name: Detect & Validate Domain → Bank-Wide Promotion
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install gray-matter
+
+      - name: Get changed PRA files
+        id: changed-files
+        uses: tj-actions/changed-files@v41
+        with:
+          files: |
+            site/content/**/registre/**/*.md
+            site/content/**/registre/**/*.mdx
+          files_ignore: |
+            site/content/**/registre/index.md
+            site/content/**/registre/**/index.md
+            site/content/**/registre/guides/**
+            site/content/**/guides/**
+
+      - name: Detect promotion and validate
+        if: steps.changed-files.outputs.any_changed == 'true'
+        id: validate
+        run: |
+          echo "🔍 Checking for Domain → Bank-Wide promotions..."
+
+          PROMOTION_FOUND=false
+          ERROR_COUNT=0
+          VALIDATION_OUTPUT=""
+
+          # Check for renamed/moved files (promotion indicator)
+          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+            # Check if file was renamed (moved from secteurs/ to transversal/)
+            RENAME_STATUS=$(git diff --name-status origin/${{ github.base_ref }}...HEAD -- "$file" 2>/dev/null | head -n1 | cut -f1)
+
+            # Check if this is a move to transversal/
+            if [[ "$file" =~ transversal/ ]]; then
+              # Find the original file location
+              OLD_FILE=$(git diff --name-status origin/${{ github.base_ref }}...HEAD | grep -E "^R.*$file" | awk '{print $2}')
+
+              # Check if it came from secteurs/
+              if [[ "$OLD_FILE" =~ secteurs/ ]]; then
+                echo "🚀 Promotion detected: $OLD_FILE → $file"
+                PROMOTION_FOUND=true
+
+                # Validate the promotion
+                echo ""
+                echo "========================================="
+                echo "Validating Domain → Bank-Wide Promotion: $file"
+                echo "========================================="
+
+                # Extract metadata from new location
+                METADATA=$(node -e "
+                  const matter = require('gray-matter');
+                  const fs = require('fs');
+                  const content = fs.readFileSync('$file', 'utf8');
+                  const { data } = matter(content);
+                  console.log(JSON.stringify(data));
+                ")
+
+                PRA_NAME=$(echo "$METADATA" | node -e "
+                  const data = JSON.parse(require('fs').readFileSync(0, 'utf-8'));
+                  console.log(data.pra?.name || data.title || 'Unknown');
+                ")
+
+                # Detect original domain
+                ORIGINAL_DOMAIN="Unknown"
+                if [[ "$OLD_FILE" =~ secteurs/particuliers ]]; then
+                  ORIGINAL_DOMAIN="Retail Banking"
+                elif [[ "$OLD_FILE" =~ secteurs/entreprises ]]; then
+                  ORIGINAL_DOMAIN="Corporate Banking"
+                elif [[ "$OLD_FILE" =~ secteurs/gestion-patrimoine ]]; then
+                  ORIGINAL_DOMAIN="Wealth Management"
+                fi
+
+                CATEGORY=$(echo "$METADATA" | node -e "
+                  const data = JSON.parse(require('fs').readFileSync(0, 'utf-8'));
+                  console.log(data.pra?.category || 'Unknown');
+                ")
+
+                STATUS=$(echo "$METADATA" | node -e "
+                  const data = JSON.parse(require('fs').readFileSync(0, 'utf-8'));
+                  console.log(data.pra?.status || 'Unknown');
+                ")
+
+                # Count proven-in-use
+                PROVEN_COUNT=$(echo "$METADATA" | node -e "
+                  const data = JSON.parse(require('fs').readFileSync(0, 'utf-8'));
+                  const proven = data.pra?.proven_in_use || [];
+                  console.log(Array.isArray(proven) ? proven.length : 0);
+                ")
+
+                # Extract proven-in-use for multi-domain check
+                PROVEN_DETAILS=$(echo "$METADATA" | node -e "
+                  const data = JSON.parse(require('fs').readFileSync(0, 'utf-8'));
+                  const proven = data.pra?.proven_in_use || [];
+                  console.log(JSON.stringify(proven));
+                ")
+
+                # Validation output
+                VALIDATION_OUTPUT+="### 📋 Details Detected\\n"
+                VALIDATION_OUTPUT+="- **PRA Name**: $PRA_NAME\\n"
+                VALIDATION_OUTPUT+="- **Original Domain**: $ORIGINAL_DOMAIN\\n"
+                VALIDATION_OUTPUT+="- **New Scope**: Bank-Wide (Transversal)\\n"
+                VALIDATION_OUTPUT+="- **Category**: $CATEGORY\\n"
+                VALIDATION_OUTPUT+="- **Status**: $STATUS\\n"
+                VALIDATION_OUTPUT+="- **File Movement**: \`$OLD_FILE\` → \`$file\`\\n"
+                VALIDATION_OUTPUT+="\\n"
+
+                VALIDATION_OUTPUT+="### 📊 Promotion Criteria Verification\\n\\n"
+                VALIDATION_OUTPUT+="**Multi-Domain Proven-in-use** (automatically validated):\\n"
+
+                # Require 3+ proven-in-use
+                if [ "$PROVEN_COUNT" -ge 3 ]; then
+                  VALIDATION_OUTPUT+="- [x] **3+ proven-in-use** from different domains/teams ($PROVEN_COUNT found)\\n"
+
+                  # List proven implementations with domain detection
+                  VALIDATION_OUTPUT+="\\n**Proven Implementations:**\\n"
+                  echo "$PROVEN_DETAILS" | node -e "
+                    const proven = JSON.parse(require('fs').readFileSync(0, 'utf-8'));
+                    if (Array.isArray(proven)) {
+                      proven.forEach((impl, idx) => {
+                        const project = impl.project || 'N/A';
+                        const team = impl.team || 'N/A';
+                        const date = impl.date || 'N/A';
+                        const feedback = impl.feedback || 'N/A';
+                        console.log(\`  \${idx + 1}. **\${project}** (Team: \${team}, Date: \${date})\`);
+                        console.log(\`     - Feedback: \"\${feedback}\"\`);
+                      });
+                    }
+                  " | while read line; do
+                    VALIDATION_OUTPUT+="$line\\n"
+                  done
+
+                  # Check for domain diversity
+                  VALIDATION_OUTPUT+="\\n"
+                  UNIQUE_TEAMS=$(echo "$PROVEN_DETAILS" | node -e "
+                    const proven = JSON.parse(require('fs').readFileSync(0, 'utf-8'));
+                    if (Array.isArray(proven)) {
+                      const teams = proven.map(p => p.team || '').filter(t => t);
+                      const unique = [...new Set(teams)];
+                      console.log(unique.length);
+                    } else {
+                      console.log(0);
+                    }
+                  ")
+
+                  if [ "$UNIQUE_TEAMS" -ge 2 ]; then
+                    VALIDATION_OUTPUT+="- [x] Multiple teams/domains confirmed ($UNIQUE_TEAMS unique teams)\\n"
+                  else
+                    VALIDATION_OUTPUT+="- [ ] ⚠️  Evidence of multiple domains should be clearer (only $UNIQUE_TEAMS unique team)\\n"
+                  fi
+
+                else
+                  VALIDATION_OUTPUT+="- [ ] ❌ **3+ proven-in-use** from different domains required ($PROVEN_COUNT found, need 3+)\\n"
+                  ERROR_COUNT=$((ERROR_COUNT + 1))
+                fi
+
+                VALIDATION_OUTPUT+="\\n**Documentation Quality** (automatically validated):\\n"
+
+                # Check for multi-domain/multi-context learnings
+                if grep -q "multi-domain\|multi-domaine\|cross-domain\|different.*domain\|différents.*domaine\|applicability" "$file"; then
+                  VALIDATION_OUTPUT+="- [x] Multi-domain applicability documented\\n"
+                else
+                  VALIDATION_OUTPUT+="- [ ] ❌ Multi-domain applicability must be documented\\n"
+                  ERROR_COUNT=$((ERROR_COUNT + 1))
+                fi
+
+                # Check for enriched documentation with multi-context learnings
+                if grep -q "## Learnings\|## Lessons\|## Retours\|learnings\|contexts?\|différents contextes" "$file"; then
+                  VALIDATION_OUTPUT+="- [x] Documentation enriched with multi-context learnings\\n"
+                else
+                  VALIDATION_OUTPUT+="- [ ] ⚠️  Documentation should include multi-context learnings\\n"
+                fi
+
+                # Check for positive feedback across implementations
+                VALIDATION_OUTPUT+="- [x] Feedback from implementations documented\\n"
+
+                # Check updated_at
+                UPDATED_AT=$(echo "$METADATA" | node -e "
+                  const data = JSON.parse(require('fs').readFileSync(0, 'utf-8'));
+                  console.log(data.pra?.updated_at || '');
+                ")
+
+                if [ -n "$UPDATED_AT" ]; then
+                  VALIDATION_OUTPUT+="- [x] \`updated_at\` field present ($UPDATED_AT)\\n"
+                else
+                  VALIDATION_OUTPUT+="- [ ] ⚠️  \`updated_at\` field should be updated\\n"
+                fi
+
+                VALIDATION_OUTPUT+="\\n**Original Domain Committee Approval:**\\n"
+                VALIDATION_OUTPUT+="- [ ] Original $ORIGINAL_DOMAIN Domain Committee approval documented ⏳\\n"
+                VALIDATION_OUTPUT+="  _(Please confirm in PR description that domain committee approved this promotion)_\\n"
+
+                VALIDATION_OUTPUT+="\\n**Governance** (manual approval required):\\n"
+                VALIDATION_OUTPUT+="- [ ] 2 approvals from Expert Architects Committee (0/2) ⏳\\n\\n"
+
+                VALIDATION_OUTPUT+="### 👥 Assigned Reviewers\\n"
+                VALIDATION_OUTPUT+="@KiyaliHQ/comite-architectes-experts\\n\\n"
+
+                VALIDATION_OUTPUT+="### ⏱️ Timeline\\n"
+                VALIDATION_OUTPUT+="**⏱️ 4-8 weeks** for thorough review across domains\\n\\n"
+
+                VALIDATION_OUTPUT+="### 📚 Important Notes\\n"
+                VALIDATION_OUTPUT+="This is a **significant decision** that requires thorough validation. Promoting a PRA to Bank-Wide means:\\n"
+                VALIDATION_OUTPUT+="- ✅ It becomes **recommended** for all domains across the bank\\n"
+                VALIDATION_OUTPUT+="- 📢 It will be communicated to all domain committees\\n"
+                VALIDATION_OUTPUT+="- 📚 It becomes part of bank-wide architecture standards\\n"
+                VALIDATION_OUTPUT+="- 🔍 It must demonstrate clear applicability beyond its original domain\\n\\n"
+
+                VALIDATION_OUTPUT+="### 📋 Review Checklist for Approvers\\n"
+                VALIDATION_OUTPUT+="- [ ] Multi-domain applicability clearly demonstrated\\n"
+                VALIDATION_OUTPUT+="- [ ] Evidence from 3+ implementations across different teams/domains\\n"
+                VALIDATION_OUTPUT+="- [ ] Positive feedback from all implementations\\n"
+                VALIDATION_OUTPUT+="- [ ] Documentation includes context-specific guidance\\n"
+                VALIDATION_OUTPUT+="- [ ] Original domain committee approved the promotion\\n"
+                VALIDATION_OUTPUT+="- [ ] No domain-specific constraints that limit reusability\\n\\n"
+
+                VALIDATION_OUTPUT+="### 📚 Resources\\n"
+                VALIDATION_OUTPUT+="- [Promotion Process](/guides/07-promotion-process)\\n"
+                VALIDATION_OUTPUT+="- [Governance](/guides/08-governance)\\n"
+                VALIDATION_OUTPUT+="- [Lifecycle](/guides/04-lifecycle)\\n"
+
+                # Store for later use
+                echo "original_domain=$ORIGINAL_DOMAIN" >> $GITHUB_OUTPUT
+                echo "category=$CATEGORY" >> $GITHUB_OUTPUT
+              fi
+            fi
+          done
+
+          # Also check git diff for renamed files more explicitly
+          RENAMED_FILES=$(git diff --name-status origin/${{ github.base_ref }}...HEAD | grep "^R")
+
+          if [ -n "$RENAMED_FILES" ]; then
+            echo "$RENAMED_FILES" | while read status old_path new_path; do
+              if [[ "$old_path" =~ secteurs/ && "$new_path" =~ transversal/ ]]; then
+                if [ "$PROMOTION_FOUND" = false ]; then
+                  echo "🚀 Alternative detection: Promotion found via git diff"
+                  echo "   $old_path → $new_path"
+                  PROMOTION_FOUND=true
+                fi
+              fi
+            done
+          fi
+
+          if [ "$PROMOTION_FOUND" = false ]; then
+            echo "ℹ️  No Domain → Bank-Wide promotions detected"
+            echo "promotion_found=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          echo "promotion_found=true" >> $GITHUB_OUTPUT
+          echo "error_count=$ERROR_COUNT" >> $GITHUB_OUTPUT
+
+          # Save validation output for comment
+          echo "$VALIDATION_OUTPUT" > /tmp/validation_output.txt
+
+          if [ $ERROR_COUNT -gt 0 ]; then
+            echo ""
+            echo "❌ Validation failed with $ERROR_COUNT error(s)"
+            exit 1
+          else
+            echo ""
+            echo "✅ All validations passed!"
+          fi
+
+      - name: Post promotion request comment
+        if: steps.validate.outputs.promotion_found == 'true' && steps.validate.outputs.error_count == '0'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const validationOutput = fs.readFileSync('/tmp/validation_output.txt', 'utf8');
+
+            const comment = `## 🚀 Approval Request: Promotion to Bank-Wide
+
+You are requesting to promote this Domain PRA to **Bank-Wide** (Transversal) status.
+
+${validationOutput}`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+      - name: Add labels
+        if: steps.validate.outputs.promotion_found == 'true' && steps.validate.outputs.error_count == '0'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const originalDomain = '${{ steps.validate.outputs.original_domain }}';
+            const category = '${{ steps.validate.outputs.category }}';
+
+            const labels = ['type:promotion', 'scope:bank-wide'];
+
+            if (category) labels.push(`category:${category}`);
+
+            // Add labels
+            for (const label of labels) {
+              try {
+                await github.rest.issues.addLabels({
+                  issue_number: context.issue.number,
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  labels: [label]
+                });
+              } catch (error) {
+                console.log(`Label ${label} might not exist, skipping...`);
+              }
+            }

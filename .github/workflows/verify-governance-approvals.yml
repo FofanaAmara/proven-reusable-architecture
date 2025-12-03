@@ -1,6 +1,6 @@
-name: Check Approvals
+name: Verify Governance Approvals
 
-# Workflow for verifying PR has sufficient approvals
+# Workflow for verifying PR has sufficient governance approvals
 # Runs on: pull_request_review (submitted)
 #
 # Validates:
@@ -71,7 +71,7 @@ jobs:
               sha: context.payload.pull_request.head.sha,
               state: state,
               description: description,
-              context: 'PRA Approvals Check'
+              context: 'Verify Governance Approvals'
             });
 
             console.log(`✅ Commit status updated: ${state}`);

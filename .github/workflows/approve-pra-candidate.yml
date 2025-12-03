@@ -1,0 +1,338 @@
+name: Approve PRA Candidate
+
+# Workflow for approving a NEW PRA to become a Candidate
+#
+# Trigger: When a new PRA file is added (doesn't exist in base branch)
+#
+# Governance:
+# - Domain PRA: Requires 2 approvals from Domain Governance Committee
+# - Bank-Wide PRA: Requires 2 approvals from Expert Architects Committee
+#
+# Validation:
+# - 1+ proven-in-use documented
+# - Complete documentation (context, architecture, ADR, examples)
+# - Valid metadata (YAML frontmatter)
+# - Reusability demonstrated
+#
+# Result: PRA merged with status 'candidate'
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    paths:
+      - 'site/content/**/registre/**/*.md'
+      - 'site/content/**/registre/**/*.mdx'
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  detect-and-validate-new-pra:
+    name: Detect & Validate New PRA Candidate
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install gray-matter
+
+      - name: Get changed PRA files
+        id: changed-files
+        uses: tj-actions/changed-files@v41
+        with:
+          files: |
+            site/content/**/registre/**/*.md
+            site/content/**/registre/**/*.mdx
+          files_ignore: |
+            site/content/**/registre/index.md
+            site/content/**/registre/**/index.md
+            site/content/**/registre/guides/**
+            site/content/**/guides/**
+
+      - name: Detect new PRA files and validate
+        if: steps.changed-files.outputs.any_changed == 'true'
+        id: validate
+        run: |
+          echo "🔍 Checking for new PRA files..."
+
+          NEW_PRA_FOUND=false
+          ERROR_COUNT=0
+          VALIDATION_OUTPUT=""
+
+          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+            # Check if file is new (doesn't exist in base branch)
+            if ! git show origin/${{ github.base_ref }}:"$file" >/dev/null 2>&1; then
+              echo "📝 New PRA detected: $file"
+              NEW_PRA_FOUND=true
+
+              # Validate the new PRA
+              echo ""
+              echo "========================================="
+              echo "Validating New PRA Candidate: $file"
+              echo "========================================="
+
+              # Extract metadata using gray-matter
+              METADATA=$(node -e "
+                const matter = require('gray-matter');
+                const fs = require('fs');
+                const content = fs.readFileSync('$file', 'utf8');
+                const { data } = matter(content);
+                console.log(JSON.stringify(data));
+              ")
+
+              # Parse metadata
+              PRA_NAME=$(echo "$METADATA" | node -e "
+                const data = JSON.parse(require('fs').readFileSync(0, 'utf-8'));
+                console.log(data.pra?.name || data.title || 'Unknown');
+              ")
+
+              SCOPE="Unknown"
+              if [[ "$file" =~ secteurs/particuliers ]]; then
+                SCOPE="Domain - Retail Banking"
+                DOMAIN="particuliers"
+              elif [[ "$file" =~ secteurs/entreprises ]]; then
+                SCOPE="Domain - Corporate Banking"
+                DOMAIN="entreprises"
+              elif [[ "$file" =~ secteurs/gestion-patrimoine ]]; then
+                SCOPE="Domain - Wealth Management"
+                DOMAIN="gestion-patrimoine"
+              elif [[ "$file" =~ transversal ]]; then
+                SCOPE="Bank-Wide"
+                DOMAIN="transversal"
+              fi
+
+              CATEGORY=$(echo "$METADATA" | node -e "
+                const data = JSON.parse(require('fs').readFileSync(0, 'utf-8'));
+                console.log(data.pra?.category || 'Unknown');
+              ")
+
+              STATUS=$(echo "$METADATA" | node -e "
+                const data = JSON.parse(require('fs').readFileSync(0, 'utf-8'));
+                console.log(data.pra?.status || 'Unknown');
+              ")
+
+              # Count proven-in-use
+              PROVEN_COUNT=$(echo "$METADATA" | node -e "
+                const data = JSON.parse(require('fs').readFileSync(0, 'utf-8'));
+                const proven = data.pra?.proven_in_use || [];
+                console.log(Array.isArray(proven) ? proven.length : 0);
+              ")
+
+              # Validation checks
+              VALIDATION_OUTPUT+="### 📋 Details Detected\n"
+              VALIDATION_OUTPUT+="- **File**: \`$file\`\n"
+              VALIDATION_OUTPUT+="- **PRA Name**: $PRA_NAME\n"
+              VALIDATION_OUTPUT+="- **Scope**: $SCOPE\n"
+              VALIDATION_OUTPUT+="- **Category**: $CATEGORY\n"
+              VALIDATION_OUTPUT+="- **Status**: $STATUS\n"
+              VALIDATION_OUTPUT+="\n"
+
+              VALIDATION_OUTPUT+="### ✅ Validation Checklist\n\n"
+              VALIDATION_OUTPUT+="**Documentation** (automatically validated):\n"
+
+              # Check required sections
+              HAS_OVERVIEW=false
+              HAS_CONTEXT=false
+              HAS_ARCHITECTURE=false
+              HAS_ADR=false
+              HAS_EXAMPLES=false
+              HAS_PROVEN=false
+
+              if grep -q "## Overview" "$file" || grep -q "## Vue d'ensemble" "$file"; then
+                HAS_OVERVIEW=true
+                VALIDATION_OUTPUT+="- [x] Overview section present\n"
+              else
+                VALIDATION_OUTPUT+="- [ ] ❌ Overview section missing\n"
+                ERROR_COUNT=$((ERROR_COUNT + 1))
+              fi
+
+              if grep -q "## Context" "$file" || grep -q "## Contexte" "$file"; then
+                HAS_CONTEXT=true
+                VALIDATION_OUTPUT+="- [x] Context section present\n"
+              else
+                VALIDATION_OUTPUT+="- [ ] ❌ Context section missing\n"
+                ERROR_COUNT=$((ERROR_COUNT + 1))
+              fi
+
+              if grep -q "## Architecture" "$file"; then
+                HAS_ARCHITECTURE=true
+                VALIDATION_OUTPUT+="- [x] Architecture section present\n"
+              else
+                VALIDATION_OUTPUT+="- [ ] ❌ Architecture section missing\n"
+                ERROR_COUNT=$((ERROR_COUNT + 1))
+              fi
+
+              if grep -q "## ADR" "$file" || grep -q "## Architecture Decision" "$file"; then
+                HAS_ADR=true
+                VALIDATION_OUTPUT+="- [x] ADRs included\n"
+              else
+                VALIDATION_OUTPUT+="- [ ] ❌ ADRs missing\n"
+                ERROR_COUNT=$((ERROR_COUNT + 1))
+              fi
+
+              if grep -q "## Examples" "$file" || grep -q "## Exemples" "$file"; then
+                HAS_EXAMPLES=true
+                VALIDATION_OUTPUT+="- [x] Code examples provided\n"
+              else
+                VALIDATION_OUTPUT+="- [ ] ❌ Code examples missing\n"
+                ERROR_COUNT=$((ERROR_COUNT + 1))
+              fi
+
+              # Check metadata validity
+              if echo "$METADATA" | grep -q "pra"; then
+                VALIDATION_OUTPUT+="- [x] Valid metadata (YAML frontmatter)\n"
+              else
+                VALIDATION_OUTPUT+="- [ ] ❌ Valid metadata missing\n"
+                ERROR_COUNT=$((ERROR_COUNT + 1))
+              fi
+
+              VALIDATION_OUTPUT+="\n**Proven-in-use** (automatically validated):\n"
+
+              if [ "$PROVEN_COUNT" -ge 1 ]; then
+                HAS_PROVEN=true
+                VALIDATION_OUTPUT+="- [x] 1+ proven-in-use documented ($PROVEN_COUNT found)\n"
+
+                # Extract proven-in-use details
+                PROVEN_DETAILS=$(echo "$METADATA" | node -e "
+                  const data = JSON.parse(require('fs').readFileSync(0, 'utf-8'));
+                  const proven = data.pra?.proven_in_use || [];
+                  if (Array.isArray(proven) && proven.length > 0) {
+                    const first = proven[0];
+                    console.log(\`  * Project: \${first.project || 'N/A'}\`);
+                    console.log(\`  * Team: \${first.team || 'N/A'}\`);
+                    console.log(\`  * Date: \${first.date || 'N/A'}\`);
+                    console.log(\`  * Feedback: \"\${first.feedback || 'N/A'}\"\`);
+                  }
+                ")
+                VALIDATION_OUTPUT+="\n$PROVEN_DETAILS\n"
+              else
+                VALIDATION_OUTPUT+="- [ ] ❌ 1+ proven-in-use required (0 found)\n"
+                ERROR_COUNT=$((ERROR_COUNT + 1))
+              fi
+
+              VALIDATION_OUTPUT+="\n**Governance** (manual approval required):\n"
+
+              if [ "$SCOPE" = "Bank-Wide" ]; then
+                VALIDATION_OUTPUT+="- [ ] 2 approvals from Expert Architects Committee (0/2) ⏳\n\n"
+                VALIDATION_OUTPUT+="### 👥 Assigned Reviewers\n"
+                VALIDATION_OUTPUT+="@KiyaliHQ/comite-architectes-experts\n\n"
+                VALIDATION_OUTPUT+="### ⏱️ Timeline\n"
+                VALIDATION_OUTPUT+="**2-4 weeks** for review and decision\n\n"
+              else
+                VALIDATION_OUTPUT+="- [ ] 2 approvals from ${SCOPE} Governance Committee (0/2) ⏳\n\n"
+                VALIDATION_OUTPUT+="### 👥 Assigned Reviewers\n"
+
+                if [ "$DOMAIN" = "particuliers" ]; then
+                  VALIDATION_OUTPUT+="@KiyaliHQ/comite-gov-particuliers\n\n"
+                elif [ "$DOMAIN" = "entreprises" ]; then
+                  VALIDATION_OUTPUT+="@KiyaliHQ/comite-gov-entreprises\n\n"
+                elif [ "$DOMAIN" = "gestion-patrimoine" ]; then
+                  VALIDATION_OUTPUT+="@KiyaliHQ/comite-gov-patrimoine\n\n"
+                fi
+
+                VALIDATION_OUTPUT+="### ⏱️ Timeline\n"
+                VALIDATION_OUTPUT+="**5-10 business days** for review and decision\n\n"
+              fi
+
+              VALIDATION_OUTPUT+="### 📚 Resources\n"
+              VALIDATION_OUTPUT+="- [Contributing Guide](/guides/06-contributing)\n"
+              VALIDATION_OUTPUT+="- [Quality Standards](/guides/05-standards)\n"
+              VALIDATION_OUTPUT+="- [Lifecycle](/guides/04-lifecycle)\n\n"
+
+              VALIDATION_OUTPUT+="Once approved, this PRA will be merged with **Candidate** status and available for teams to use with caution.\n"
+
+              # Store for later use
+              echo "scope=$SCOPE" >> $GITHUB_OUTPUT
+              echo "domain=$DOMAIN" >> $GITHUB_OUTPUT
+              echo "category=$CATEGORY" >> $GITHUB_OUTPUT
+            fi
+          done
+
+          if [ "$NEW_PRA_FOUND" = false ]; then
+            echo "ℹ️  No new PRA files detected (all files already exist in base branch)"
+            echo "new_pra_found=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          echo "new_pra_found=true" >> $GITHUB_OUTPUT
+          echo "error_count=$ERROR_COUNT" >> $GITHUB_OUTPUT
+
+          # Save validation output for comment
+          echo "$VALIDATION_OUTPUT" > /tmp/validation_output.txt
+
+          if [ $ERROR_COUNT -gt 0 ]; then
+            echo ""
+            echo "❌ Validation failed with $ERROR_COUNT error(s)"
+            exit 1
+          else
+            echo ""
+            echo "✅ All validations passed!"
+          fi
+
+      - name: Post approval request comment
+        if: steps.validate.outputs.new_pra_found == 'true' && steps.validate.outputs.error_count == '0'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const validationOutput = fs.readFileSync('/tmp/validation_output.txt', 'utf8');
+
+            const comment = `## 📝 Approval Request: New PRA Candidate
+
+You are requesting approval to add a new PRA as **Candidate**.
+
+${validationOutput}`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+      - name: Add labels
+        if: steps.validate.outputs.new_pra_found == 'true' && steps.validate.outputs.error_count == '0'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const scope = '${{ steps.validate.outputs.scope }}';
+            const domain = '${{ steps.validate.outputs.domain }}';
+            const category = '${{ steps.validate.outputs.category }}';
+
+            const labels = ['type:new-pra'];
+
+            if (scope === 'Bank-Wide') {
+              labels.push('scope:bank-wide');
+            } else {
+              labels.push('scope:domaine');
+              if (domain === 'particuliers') labels.push('domaine:particuliers');
+              if (domain === 'entreprises') labels.push('domaine:entreprises');
+              if (domain === 'gestion-patrimoine') labels.push('domaine:gestion-patrimoine');
+            }
+
+            if (category) labels.push(`category:${category}`);
+
+            // Add labels
+            for (const label of labels) {
+              try {
+                await github.rest.issues.addLabels({
+                  issue_number: context.issue.number,
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  labels: [label]
+                });
+              } catch (error) {
+                console.log(`Label ${label} might not exist, skipping...`);
+              }
+            }

@@ -1,0 +1,409 @@
+name: Approve PRA Deprecation
+
+# Workflow for approving deprecation of a PRA
+#
+# Trigger: When PRA status changes to 'deprecated'
+#
+# Governance:
+# - Domain PRA: Simple majority vote from Domain Governance Committee
+# - Bank-Wide PRA: 2/3 vote from Expert Architects Committee
+#
+# Validation:
+# - Clear deprecation reason provided
+# - Alternative PRA recommended (if applicable)
+# - Migration plan provided
+# - Consultation with known users
+#
+# Actions:
+# - Creates tracking issue for transition period
+# - Applies deprecation labels
+# - Notifies known users
+#
+# Result: PRA status set to 'deprecated', moved to deprecated/ directory
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    paths:
+      - 'site/content/**/registre/**/*.md'
+      - 'site/content/**/registre/**/*.mdx'
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  detect-and-validate-deprecation:
+    name: Detect & Validate PRA Deprecation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install gray-matter
+
+      - name: Get changed PRA files
+        id: changed-files
+        uses: tj-actions/changed-files@v41
+        with:
+          files: |
+            site/content/**/registre/**/*.md
+            site/content/**/registre/**/*.mdx
+          files_ignore: |
+            site/content/**/registre/index.md
+            site/content/**/registre/**/index.md
+            site/content/**/registre/guides/**
+            site/content/**/guides/**
+
+      - name: Detect deprecation and validate
+        if: steps.changed-files.outputs.any_changed == 'true'
+        id: validate
+        run: |
+          echo "🔍 Checking for PRA deprecations..."
+
+          DEPRECATION_FOUND=false
+          ERROR_COUNT=0
+          VALIDATION_OUTPUT=""
+
+          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+            # Check if file exists in both base and head (not a new file)
+            if git show origin/${{ github.base_ref }}:"$file" >/dev/null 2>&1; then
+              echo "📝 Checking existing PRA: $file"
+
+              # Extract OLD status from base branch
+              OLD_METADATA=$(git show origin/${{ github.base_ref }}:"$file" | node -e "
+                const matter = require('gray-matter');
+                const content = require('fs').readFileSync(0, 'utf8');
+                const { data } = matter(content);
+                console.log(JSON.stringify(data));
+              ")
+
+              OLD_STATUS=$(echo "$OLD_METADATA" | node -e "
+                const data = JSON.parse(require('fs').readFileSync(0, 'utf-8'));
+                console.log(data.pra?.status || 'unknown');
+              ")
+
+              # Extract NEW status from head (current PR)
+              NEW_METADATA=$(node -e "
+                const matter = require('gray-matter');
+                const fs = require('fs');
+                const content = fs.readFileSync('$file', 'utf8');
+                const { data } = matter(content);
+                console.log(JSON.stringify(data));
+              ")
+
+              NEW_STATUS=$(echo "$NEW_METADATA" | node -e "
+                const data = JSON.parse(require('fs').readFileSync(0, 'utf--8'));
+                console.log(data.pra?.status || 'unknown');
+              ")
+
+              # Check if this is a transition to deprecated
+              if [[ "$NEW_STATUS" == "deprecated" && "$OLD_STATUS" != "deprecated" ]]; then
+                echo "🗑️  Deprecation detected: $file"
+                echo "   Old status: $OLD_STATUS"
+                echo "   New status: $NEW_STATUS"
+                DEPRECATION_FOUND=true
+
+                # Validate the deprecation
+                echo ""
+                echo "========================================="
+                echo "Validating PRA Deprecation: $file"
+                echo "========================================="
+
+                # Parse metadata
+                PRA_NAME=$(echo "$NEW_METADATA" | node -e "
+                  const data = JSON.parse(require('fs').readFileSync(0, 'utf-8'));
+                  console.log(data.pra?.name || data.title || 'Unknown');
+                ")
+
+                # Detect scope
+                SCOPE="Unknown"
+                if [[ "$file" =~ secteurs/particuliers ]]; then
+                  SCOPE="Domain - Retail Banking"
+                  DOMAIN="particuliers"
+                  TRANSITION_PERIOD="3 months"
+                elif [[ "$file" =~ secteurs/entreprises ]]; then
+                  SCOPE="Domain - Corporate Banking"
+                  DOMAIN="entreprises"
+                  TRANSITION_PERIOD="3 months"
+                elif [[ "$file" =~ secteurs/gestion-patrimoine ]]; then
+                  SCOPE="Domain - Wealth Management"
+                  DOMAIN="gestion-patrimoine"
+                  TRANSITION_PERIOD="3 months"
+                elif [[ "$file" =~ transversal ]]; then
+                  SCOPE="Bank-Wide"
+                  DOMAIN="transversal"
+                  TRANSITION_PERIOD="6 months"
+                fi
+
+                CATEGORY=$(echo "$NEW_METADATA" | node -e "
+                  const data = JSON.parse(require('fs').readFileSync(0, 'utf-8'));
+                  console.log(data.pra?.category || 'Unknown');
+                ")
+
+                # Extract deprecation info
+                DEPRECATED_AT=$(echo "$NEW_METADATA" | node -e "
+                  const data = JSON.parse(require('fs').readFileSync(0, 'utf-8'));
+                  console.log(data.pra?.deprecated_at || '');
+                ")
+
+                DEPRECATION_REASON=$(echo "$NEW_METADATA" | node -e "
+                  const data = JSON.parse(require('fs').readFileSync(0, 'utf-8'));
+                  console.log(data.pra?.deprecation_reason || '');
+                ")
+
+                ALTERNATIVE=$(echo "$NEW_METADATA" | node -e "
+                  const data = JSON.parse(require('fs').readFileSync(0, 'utf-8'));
+                  console.log(data.pra?.alternative || '');
+                ")
+
+                # Validation output
+                VALIDATION_OUTPUT+="### 📋 Details Detected\\n"
+                VALIDATION_OUTPUT+="- **File**: \`$file\`\\n"
+                VALIDATION_OUTPUT+="- **PRA Name**: $PRA_NAME\\n"
+                VALIDATION_OUTPUT+="- **Scope**: $SCOPE\\n"
+                VALIDATION_OUTPUT+="- **Category**: $CATEGORY\\n"
+                VALIDATION_OUTPUT+="- **Status Transition**: $OLD_STATUS → deprecated\\n"
+                VALIDATION_OUTPUT+="\\n"
+
+                VALIDATION_OUTPUT+="### ✅ Validation Checklist\\n\\n"
+                VALIDATION_OUTPUT+="**Deprecation Justification** (automatically validated):\\n"
+
+                # Check for deprecation reason
+                if [ -n "$DEPRECATION_REASON" ]; then
+                  VALIDATION_OUTPUT+="- [x] Clear deprecation reason provided\\n"
+                  VALIDATION_OUTPUT+="  * Reason: \"$DEPRECATION_REASON\"\\n"
+                elif grep -q "## Deprecation\|## Dépréciation\|deprecated because\|obsolete\|no longer" "$file"; then
+                  VALIDATION_OUTPUT+="- [x] Deprecation reason documented in content\\n"
+                else
+                  VALIDATION_OUTPUT+="- [ ] ❌ Clear deprecation reason required\\n"
+                  ERROR_COUNT=$((ERROR_COUNT + 1))
+                fi
+
+                # Check for alternative recommendation
+                VALIDATION_OUTPUT+="\\n**Alternative PRA** (recommended):\\n"
+                if [ -n "$ALTERNATIVE" ]; then
+                  VALIDATION_OUTPUT+="- [x] Alternative PRA recommended\\n"
+                  VALIDATION_OUTPUT+="  * Alternative: $ALTERNATIVE\\n"
+                elif grep -q "alternative\|replacement\|use.*instead\|migrate.*to" "$file"; then
+                  VALIDATION_OUTPUT+="- [x] Alternative mentioned in content\\n"
+                else
+                  VALIDATION_OUTPUT+="- [ ] ⚠️  Alternative PRA should be recommended (if applicable)\\n"
+                fi
+
+                # Check for migration plan
+                VALIDATION_OUTPUT+="\\n**Migration Plan** (recommended):\\n"
+                if grep -q "## Migration\|migration plan\|how to migrate\|steps to migrate" "$file"; then
+                  VALIDATION_OUTPUT+="- [x] Migration plan provided\\n"
+                else
+                  VALIDATION_OUTPUT+="- [ ] ⚠️  Migration plan should be provided\\n"
+                fi
+
+                # Check for user consultation
+                VALIDATION_OUTPUT+="\\n**User Consultation:**\\n"
+                VALIDATION_OUTPUT+="- [ ] Known users have been consulted ⏳\\n"
+                VALIDATION_OUTPUT+="  _(Please confirm in PR description that users were notified)_\\n"
+
+                # Check deprecated_at date
+                if [ -n "$DEPRECATED_AT" ]; then
+                  VALIDATION_OUTPUT+="\\n- [x] \`deprecated_at\` field present ($DEPRECATED_AT)\\n"
+
+                  # Calculate end of support date
+                  if [[ "$SCOPE" == "Bank-Wide" ]]; then
+                    VALIDATION_OUTPUT+="- [x] Transition period: **6 months** (Bank-Wide)\\n"
+                  else
+                    VALIDATION_OUTPUT+="- [x] Transition period: **3 months** (Domain)\\n"
+                  fi
+                else
+                  VALIDATION_OUTPUT+="\\n- [ ] ⚠️  \`deprecated_at\` field should be added to metadata\\n"
+                fi
+
+                VALIDATION_OUTPUT+="\\n**Governance** (manual approval required):\\n"
+
+                if [ "$SCOPE" = "Bank-Wide" ]; then
+                  VALIDATION_OUTPUT+="- [ ] 2/3 vote from Expert Architects Committee ⏳\\n"
+                  VALIDATION_OUTPUT+="  _(Requires 2 approvals from committee of 3 members)_\\n\\n"
+                  VALIDATION_OUTPUT+="### 👥 Assigned Reviewers\\n"
+                  VALIDATION_OUTPUT+="@KiyaliHQ/comite-architectes-experts\\n\\n"
+                else
+                  VALIDATION_OUTPUT+="- [ ] Simple majority vote from ${SCOPE} Governance Committee ⏳\\n"
+                  VALIDATION_OUTPUT+="  _(Requires 2 approvals)_\\n\\n"
+                  VALIDATION_OUTPUT+="### 👥 Assigned Reviewers\\n"
+
+                  if [ "$DOMAIN" = "particuliers" ]; then
+                    VALIDATION_OUTPUT+="@KiyaliHQ/comite-gov-particuliers\\n\\n"
+                  elif [ "$DOMAIN" = "entreprises" ]; then
+                    VALIDATION_OUTPUT+="@KiyaliHQ/comite-gov-entreprises\\n\\n"
+                  elif [ "$DOMAIN" = "gestion-patrimoine" ]; then
+                    VALIDATION_OUTPUT+="@KiyaliHQ/comite-gov-patrimoine\\n\\n"
+                  fi
+                fi
+
+                VALIDATION_OUTPUT+="### ⏱️ Transition Period\\n"
+                VALIDATION_OUTPUT+="**$TRANSITION_PERIOD** for teams to migrate to alternative\\n\\n"
+
+                VALIDATION_OUTPUT+="### 🔔 Automatic Actions\\n"
+                VALIDATION_OUTPUT+="Once approved, the following actions will occur:\\n"
+                VALIDATION_OUTPUT+="- 📝 Issue created for tracking transition period\\n"
+                VALIDATION_OUTPUT+="- 🏷️  Labels applied: \`type:deprecation\`, \`status:deprecated\`\\n"
+                VALIDATION_OUTPUT+="- 📢 Known users will be notified\\n"
+                VALIDATION_OUTPUT+="- 📁 PRA will be moved to \`deprecated/\` directory\\n\\n"
+
+                VALIDATION_OUTPUT+="### ⚠️  Important Notes\\n"
+                VALIDATION_OUTPUT+="**For teams currently using this PRA:**\\n"
+                VALIDATION_OUTPUT+="- ✅ You can continue **maintenance** for $TRANSITION_PERIOD\\n"
+                VALIDATION_OUTPUT+="- ❌ **No new projects** should use this PRA\\n"
+                VALIDATION_OUTPUT+="- 🔄 Plan migration to recommended alternative\\n"
+                VALIDATION_OUTPUT+="- 💬 Support available during transition period\\n\\n"
+
+                VALIDATION_OUTPUT+="### 📚 Resources\\n"
+                VALIDATION_OUTPUT+="- [Lifecycle Guide](/guides/04-lifecycle)\\n"
+                VALIDATION_OUTPUT+="- [Governance](/guides/08-governance)\\n"
+
+                # Store for later use
+                echo "scope=$SCOPE" >> $GITHUB_OUTPUT
+                echo "domain=$DOMAIN" >> $GITHUB_OUTPUT
+                echo "category=$CATEGORY" >> $GITHUB_OUTPUT
+                echo "pra_name=$PRA_NAME" >> $GITHUB_OUTPUT
+                echo "transition_period=$TRANSITION_PERIOD" >> $GITHUB_OUTPUT
+              fi
+            fi
+          done
+
+          if [ "$DEPRECATION_FOUND" = false ]; then
+            echo "ℹ️  No PRA deprecations detected"
+            echo "deprecation_found=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          echo "deprecation_found=true" >> $GITHUB_OUTPUT
+          echo "error_count=$ERROR_COUNT" >> $GITHUB_OUTPUT
+
+          # Save validation output for comment
+          echo "$VALIDATION_OUTPUT" > /tmp/validation_output.txt
+
+          if [ $ERROR_COUNT -gt 0 ]; then
+            echo ""
+            echo "❌ Validation failed with $ERROR_COUNT error(s)"
+            exit 1
+          else
+            echo ""
+            echo "✅ All validations passed!"
+          fi
+
+      - name: Post deprecation request comment
+        if: steps.validate.outputs.deprecation_found == 'true' && steps.validate.outputs.error_count == '0'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const validationOutput = fs.readFileSync('/tmp/validation_output.txt', 'utf8');
+
+            const comment = `## 🗑️ Approval Request: PRA Deprecation
+
+You are requesting to deprecate this PRA.
+
+${validationOutput}`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+      - name: Create tracking issue for transition period
+        if: steps.validate.outputs.deprecation_found == 'true' && steps.validate.outputs.error_count == '0'
+        uses: actions/github-script@v7
+        id: create-issue
+        with:
+          script: |
+            const praName = '${{ steps.validate.outputs.pra_name }}';
+            const scope = '${{ steps.validate.outputs.scope }}';
+            const transitionPeriod = '${{ steps.validate.outputs.transition_period }}';
+
+            // Calculate end date (approximate)
+            const today = new Date();
+            const months = transitionPeriod.includes('6') ? 6 : 3;
+            const endDate = new Date(today.setMonth(today.getMonth() + months));
+            const endDateStr = endDate.toISOString().split('T')[0];
+
+            const issueBody = `## 🗑️ PRA Deprecation Tracking
+
+**PRA**: ${praName}
+**Scope**: ${scope}
+**Transition Period**: ${transitionPeriod}
+**End of Support Date**: ${endDateStr}
+
+### Tasks
+- [ ] Notify all known users
+- [ ] Update documentation with deprecation notice
+- [ ] Monitor usage during transition period
+- [ ] Provide migration support to teams
+- [ ] Final archival after transition period
+
+### Known Users
+<!-- Please list teams/projects currently using this PRA -->
+
+### Migration Progress
+<!-- Track migration progress here -->
+
+---
+**Linked PR**: #${{ github.event.pull_request.number }}
+`;
+
+            const issue = await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `[Deprecation] ${praName} - Transition Period Tracking`,
+              body: issueBody,
+              labels: ['type:deprecation', 'tracking']
+            });
+
+            return issue.data.number;
+
+      - name: Add labels
+        if: steps.validate.outputs.deprecation_found == 'true' && steps.validate.outputs.error_count == '0'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const scope = '${{ steps.validate.outputs.scope }}';
+            const domain = '${{ steps.validate.outputs.domain }}';
+            const category = '${{ steps.validate.outputs.category }}';
+
+            const labels = ['type:deprecation', 'status:deprecated'];
+
+            if (scope === 'Bank-Wide') {
+              labels.push('scope:bank-wide');
+            } else {
+              labels.push('scope:domaine');
+              if (domain === 'particuliers') labels.push('domaine:particuliers');
+              if (domain === 'entreprises') labels.push('domaine:entreprises');
+              if (domain === 'gestion-patrimoine') labels.push('domaine:gestion-patrimoine');
+            }
+
+            if (category) labels.push(`category:${category}`);
+
+            // Add labels
+            for (const label of labels) {
+              try {
+                await github.rest.issues.addLabels({
+                  issue_number: context.issue.number,
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  labels: [label]
+                });
+              } catch (error) {
+                console.log(`Label ${label} might not exist, skipping...`);
+              }
+            }

@@ -1,0 +1,386 @@
+name: Approve PRA Approved
+
+# Workflow for approving transition from Candidate to Approved status
+#
+# Trigger: When PRA status changes from 'candidate' to 'approved'
+#
+# Governance:
+# - Domain PRA: Requires 2 approvals from Domain Governance Committee
+# - Bank-Wide PRA: Requires 2 approvals from Expert Architects Committee
+#
+# Validation:
+# - Domain: 1+ proven-in-use in domain, positive feedback, enriched documentation
+# - Bank-Wide: 3+ proven-in-use multi-domains, positive feedback, enriched documentation
+#
+# Result: PRA status transitions to 'approved'
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    paths:
+      - 'site/content/**/registre/**/*.md'
+      - 'site/content/**/registre/**/*.mdx'
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  detect-and-validate-status-transition:
+    name: Detect & Validate Candidate → Approved Transition
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install gray-matter
+
+      - name: Get changed PRA files
+        id: changed-files
+        uses: tj-actions/changed-files@v41
+        with:
+          files: |
+            site/content/**/registre/**/*.md
+            site/content/**/registre/**/*.mdx
+          files_ignore: |
+            site/content/**/registre/index.md
+            site/content/**/registre/**/index.md
+            site/content/**/registre/guides/**
+            site/content/**/guides/**
+
+      - name: Detect status transition and validate
+        if: steps.changed-files.outputs.any_changed == 'true'
+        id: validate
+        run: |
+          echo "🔍 Checking for Candidate → Approved status transitions..."
+
+          TRANSITION_FOUND=false
+          ERROR_COUNT=0
+          VALIDATION_OUTPUT=""
+
+          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+            # Check if file exists in both base and head (not a new file)
+            if git show origin/${{ github.base_ref }}:"$file" >/dev/null 2>&1; then
+              echo "📝 Checking existing PRA: $file"
+
+              # Extract OLD status from base branch
+              OLD_METADATA=$(git show origin/${{ github.base_ref }}:"$file" | node -e "
+                const matter = require('gray-matter');
+                const content = require('fs').readFileSync(0, 'utf8');
+                const { data } = matter(content);
+                console.log(JSON.stringify(data));
+              ")
+
+              OLD_STATUS=$(echo "$OLD_METADATA" | node -e "
+                const data = JSON.parse(require('fs').readFileSync(0, 'utf-8'));
+                console.log(data.pra?.status || 'unknown');
+              ")
+
+              # Extract NEW status from head (current PR)
+              NEW_METADATA=$(node -e "
+                const matter = require('gray-matter');
+                const fs = require('fs');
+                const content = fs.readFileSync('$file', 'utf8');
+                const { data } = matter(content);
+                console.log(JSON.stringify(data));
+              ")
+
+              NEW_STATUS=$(echo "$NEW_METADATA" | node -e "
+                const data = JSON.parse(require('fs').readFileSync(0, 'utf-8'));
+                console.log(data.pra?.status || 'unknown');
+              ")
+
+              # Check if this is a Candidate → Approved transition
+              if [[ "$OLD_STATUS" != "approved" && "$NEW_STATUS" == "approved" ]]; then
+                echo "✅ Candidate → Approved transition detected: $file"
+                echo "   Old status: $OLD_STATUS"
+                echo "   New status: $NEW_STATUS"
+                TRANSITION_FOUND=true
+
+                # Validate the transition
+                echo ""
+                echo "========================================="
+                echo "Validating Candidate → Approved Transition: $file"
+                echo "========================================="
+
+                # Parse metadata
+                PRA_NAME=$(echo "$NEW_METADATA" | node -e "
+                  const data = JSON.parse(require('fs').readFileSync(0, 'utf-8'));
+                  console.log(data.pra?.name || data.title || 'Unknown');
+                ")
+
+                # Detect scope
+                SCOPE="Unknown"
+                if [[ "$file" =~ secteurs/particuliers ]]; then
+                  SCOPE="Domain - Retail Banking"
+                  DOMAIN="particuliers"
+                elif [[ "$file" =~ secteurs/entreprises ]]; then
+                  SCOPE="Domain - Corporate Banking"
+                  DOMAIN="entreprises"
+                elif [[ "$file" =~ secteurs/gestion-patrimoine ]]; then
+                  SCOPE="Domain - Wealth Management"
+                  DOMAIN="gestion-patrimoine"
+                elif [[ "$file" =~ transversal ]]; then
+                  SCOPE="Bank-Wide"
+                  DOMAIN="transversal"
+                fi
+
+                CATEGORY=$(echo "$NEW_METADATA" | node -e "
+                  const data = JSON.parse(require('fs').readFileSync(0, 'utf-8'));
+                  console.log(data.pra?.category || 'Unknown');
+                ")
+
+                # Count proven-in-use
+                PROVEN_COUNT=$(echo "$NEW_METADATA" | node -e "
+                  const data = JSON.parse(require('fs').readFileSync(0, 'utf-8'));
+                  const proven = data.pra?.proven_in_use || [];
+                  console.log(Array.isArray(proven) ? proven.length : 0);
+                ")
+
+                # Extract proven-in-use for multi-domain check
+                PROVEN_DETAILS=$(echo "$NEW_METADATA" | node -e "
+                  const data = JSON.parse(require('fs').readFileSync(0, 'utf-8'));
+                  const proven = data.pra?.proven_in_use || [];
+                  console.log(JSON.stringify(proven));
+                ")
+
+                # Validation output
+                VALIDATION_OUTPUT+="### 📋 Details Detected\\n"
+                VALIDATION_OUTPUT+="- **File**: \`$file\`\\n"
+                VALIDATION_OUTPUT+="- **PRA Name**: $PRA_NAME\\n"
+                VALIDATION_OUTPUT+="- **Scope**: $SCOPE\\n"
+                VALIDATION_OUTPUT+="- **Category**: $CATEGORY\\n"
+                VALIDATION_OUTPUT+="- **Status Transition**: $OLD_STATUS → $NEW_STATUS\\n"
+                VALIDATION_OUTPUT+="\\n"
+
+                VALIDATION_OUTPUT+="### 📊 Criteria Verification\\n\\n"
+
+                # Validation criteria depend on scope
+                if [ "$SCOPE" = "Bank-Wide" ]; then
+                  VALIDATION_OUTPUT+="**Bank-Wide PRA Approval Criteria:**\\n\\n"
+
+                  # Require 3+ proven-in-use multi-domains
+                  if [ "$PROVEN_COUNT" -ge 3 ]; then
+                    VALIDATION_OUTPUT+="- [x] **3+ proven-in-use** from multiple domains ($PROVEN_COUNT found)\\n"
+
+                    # List proven implementations
+                    VALIDATION_OUTPUT+="\\n**Proven Implementations:**\\n"
+                    echo "$PROVEN_DETAILS" | node -e "
+                      const proven = JSON.parse(require('fs').readFileSync(0, 'utf-8'));
+                      if (Array.isArray(proven)) {
+                        proven.forEach((impl, idx) => {
+                          console.log(\`  * Implementation \${idx + 1}: \${impl.project || 'N/A'} (Team: \${impl.team || 'N/A'}, Date: \${impl.date || 'N/A'})\`);
+                        });
+                      }
+                    " | while read line; do
+                      VALIDATION_OUTPUT+="$line\\n"
+                    done
+                  else
+                    VALIDATION_OUTPUT+="- [ ] ❌ **3+ proven-in-use** from multiple domains required ($PROVEN_COUNT found, need 3+)\\n"
+                    ERROR_COUNT=$((ERROR_COUNT + 1))
+                  fi
+
+                  # Check for multi-domain evidence
+                  VALIDATION_OUTPUT+="\\n"
+                  if grep -q "multi-domain\|multi-domaine\|different.*domain\|différents.*domaine" "$file"; then
+                    VALIDATION_OUTPUT+="- [x] Multi-domain applicability documented\\n"
+                  else
+                    VALIDATION_OUTPUT+="- [ ] ⚠️  Multi-domain applicability should be documented\\n"
+                  fi
+
+                else
+                  # Domain PRA
+                  VALIDATION_OUTPUT+="**Domain PRA Approval Criteria ($SCOPE):**\\n\\n"
+
+                  # Require 1+ proven-in-use in domain
+                  if [ "$PROVEN_COUNT" -ge 1 ]; then
+                    VALIDATION_OUTPUT+="- [x] **1+ proven-in-use** in $SCOPE ($PROVEN_COUNT found)\\n"
+
+                    # List proven implementations
+                    VALIDATION_OUTPUT+="\\n**Proven Implementations:**\\n"
+                    echo "$PROVEN_DETAILS" | node -e "
+                      const proven = JSON.parse(require('fs').readFileSync(0, 'utf-8'));
+                      if (Array.isArray(proven)) {
+                        proven.forEach((impl, idx) => {
+                          const feedback = impl.feedback || 'N/A';
+                          console.log(\`  * Implementation \${idx + 1}: \${impl.project || 'N/A'}\`);
+                          console.log(\`    - Team: \${impl.team || 'N/A'}\`);
+                          console.log(\`    - Date: \${impl.date || 'N/A'}\`);
+                          console.log(\`    - Feedback: \"\${feedback}\"\`);
+                        });
+                      }
+                    " | while read line; do
+                      VALIDATION_OUTPUT+="$line\\n"
+                    done
+                  else
+                    VALIDATION_OUTPUT+="- [ ] ❌ **1+ proven-in-use** in domain required ($PROVEN_COUNT found)\\n"
+                    ERROR_COUNT=$((ERROR_COUNT + 1))
+                  fi
+                fi
+
+                # Check for enriched documentation with learnings
+                VALIDATION_OUTPUT+="\\n**Documentation Quality:**\\n"
+
+                if grep -q "## Learnings\|## Lessons Learned\|## Retours d'expérience\|learnings\|lessons" "$file"; then
+                  VALIDATION_OUTPUT+="- [x] Documentation enriched with learnings/feedback\\n"
+                else
+                  VALIDATION_OUTPUT+="- [ ] ⚠️  Documentation should include learnings section\\n"
+                fi
+
+                # Check for positive feedback
+                HAS_POSITIVE_FEEDBACK=false
+                if grep -q "positive\|successful\|réussi\|satisfied\|satisfait\|good\|bien" "$file"; then
+                  HAS_POSITIVE_FEEDBACK=true
+                  VALIDATION_OUTPUT+="- [x] Positive feedback documented\\n"
+                else
+                  VALIDATION_OUTPUT+="- [ ] ⚠️  Positive feedback should be documented\\n"
+                fi
+
+                # Check updated_at is recent
+                UPDATED_AT=$(echo "$NEW_METADATA" | node -e "
+                  const data = JSON.parse(require('fs').readFileSync(0, 'utf-8'));
+                  console.log(data.pra?.updated_at || '');
+                ")
+
+                if [ -n "$UPDATED_AT" ]; then
+                  VALIDATION_OUTPUT+="- [x] \`updated_at\` field present ($UPDATED_AT)\\n"
+                else
+                  VALIDATION_OUTPUT+="- [ ] ⚠️  \`updated_at\` field should be updated\\n"
+                fi
+
+                VALIDATION_OUTPUT+="\\n**Governance** (manual approval required):\\n"
+
+                if [ "$SCOPE" = "Bank-Wide" ]; then
+                  VALIDATION_OUTPUT+="- [ ] 2 approvals from Expert Architects Committee (0/2) ⏳\\n\\n"
+                  VALIDATION_OUTPUT+="### 👥 Assigned Reviewers\\n"
+                  VALIDATION_OUTPUT+="@KiyaliHQ/comite-architectes-experts\\n\\n"
+                  VALIDATION_OUTPUT+="### ⏱️ Timeline\\n"
+                  VALIDATION_OUTPUT+="**2-4 weeks** for review and decision\\n\\n"
+                else
+                  VALIDATION_OUTPUT+="- [ ] 2 approvals from ${SCOPE} Governance Committee (0/2) ⏳\\n\\n"
+                  VALIDATION_OUTPUT+="### 👥 Assigned Reviewers\\n"
+
+                  if [ "$DOMAIN" = "particuliers" ]; then
+                    VALIDATION_OUTPUT+="@KiyaliHQ/comite-gov-particuliers\\n\\n"
+                  elif [ "$DOMAIN" = "entreprises" ]; then
+                    VALIDATION_OUTPUT+="@KiyaliHQ/comite-gov-entreprises\\n\\n"
+                  elif [ "$DOMAIN" = "gestion-patrimoine" ]; then
+                    VALIDATION_OUTPUT+="@KiyaliHQ/comite-gov-patrimoine\\n\\n"
+                  fi
+
+                  VALIDATION_OUTPUT+="### ⏱️ Timeline\\n"
+                  VALIDATION_OUTPUT+="**5-10 business days** for review and decision\\n\\n"
+                fi
+
+                VALIDATION_OUTPUT+="### 📚 Resources\\n"
+                VALIDATION_OUTPUT+="- [Lifecycle Guide](/guides/04-lifecycle)\\n"
+                VALIDATION_OUTPUT+="- [Quality Standards](/guides/05-standards)\\n"
+                VALIDATION_OUTPUT+="- [Governance](/guides/08-governance)\\n\\n"
+
+                VALIDATION_OUTPUT+="### 📢 What Happens Next\\n"
+                VALIDATION_OUTPUT+="Once approved, this PRA will transition to **Approved** status and will be:\\n"
+                if [ "$SCOPE" = "Bank-Wide" ]; then
+                  VALIDATION_OUTPUT+="- ✅ **Recommended** for all domains across the bank\\n"
+                  VALIDATION_OUTPUT+="- 📢 Communicated to all domain committees\\n"
+                  VALIDATION_OUTPUT+="- 📚 Added to bank-wide architecture standards\\n"
+                else
+                  VALIDATION_OUTPUT+="- ✅ **Recommended** for all projects in $SCOPE\\n"
+                  VALIDATION_OUTPUT+="- 📢 Communicated to domain teams\\n"
+                  VALIDATION_OUTPUT+="- 📚 Added to domain architecture standards\\n"
+                fi
+
+                # Store for later use
+                echo "scope=$SCOPE" >> $GITHUB_OUTPUT
+                echo "domain=$DOMAIN" >> $GITHUB_OUTPUT
+                echo "category=$CATEGORY" >> $GITHUB_OUTPUT
+              fi
+            fi
+          done
+
+          if [ "$TRANSITION_FOUND" = false ]; then
+            echo "ℹ️  No Candidate → Approved status transitions detected"
+            echo "transition_found=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          echo "transition_found=true" >> $GITHUB_OUTPUT
+          echo "error_count=$ERROR_COUNT" >> $GITHUB_OUTPUT
+
+          # Save validation output for comment
+          echo "$VALIDATION_OUTPUT" > /tmp/validation_output.txt
+
+          if [ $ERROR_COUNT -gt 0 ]; then
+            echo ""
+            echo "❌ Validation failed with $ERROR_COUNT error(s)"
+            exit 1
+          else
+            echo ""
+            echo "✅ All validations passed!"
+          fi
+
+      - name: Post approval request comment
+        if: steps.validate.outputs.transition_found == 'true' && steps.validate.outputs.error_count == '0'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const validationOutput = fs.readFileSync('/tmp/validation_output.txt', 'utf8');
+
+            const comment = `## ✅ Approval Request: Candidate → Approved
+
+You are requesting to transition this PRA from **Candidate** to **Approved** status.
+
+${validationOutput}`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+      - name: Add labels
+        if: steps.validate.outputs.transition_found == 'true' && steps.validate.outputs.error_count == '0'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const scope = '${{ steps.validate.outputs.scope }}';
+            const domain = '${{ steps.validate.outputs.domain }}';
+            const category = '${{ steps.validate.outputs.category }}';
+
+            const labels = ['type:status-change', 'status:approved'];
+
+            if (scope === 'Bank-Wide') {
+              labels.push('scope:bank-wide');
+            } else {
+              labels.push('scope:domaine');
+              if (domain === 'particuliers') labels.push('domaine:particuliers');
+              if (domain === 'entreprises') labels.push('domaine:entreprises');
+              if (domain === 'gestion-patrimoine') labels.push('domaine:gestion-patrimoine');
+            }
+
+            if (category) labels.push(`category:${category}`);
+
+            // Add labels
+            for (const label of labels) {
+              try {
+                await github.rest.issues.addLabels({
+                  issue_number: context.issue.number,
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  labels: [label]
+                });
+              } catch (error) {
+                console.log(`Label ${label} might not exist, skipping...`);
+              }
+            }
