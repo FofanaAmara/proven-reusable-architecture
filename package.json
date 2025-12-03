@@ -24,10 +24,12 @@
     "type-check": "pnpm --filter site type-check",
     "validate": "./scripts/validate-metadata.sh"
   },
-  "devDependencies": {},
   "engines": {
     "node": ">=20.0.0",
     "pnpm": ">=8.0.0"
   },
-  "packageManager": "pnpm@8.15.0"
+  "packageManager": "pnpm@8.15.0",
+  "dependencies": {
+    "gray-matter": "^4.0.3"
+  }
 }

@@ -1,0 +1,188 @@
+name: Assign Reviewers
+
+# Workflow for automatically assigning reviewers based on PRA scope
+# Runs on: pull_request (labeled)
+#
+# Assigns:
+# - Domain PRAs → Domain governance committee
+# - Bank-Wide PRAs → Expert architects committee
+# - Promotions → Expert architects committee
+
+on:
+  pull_request:
+    types: [labeled]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  assign-reviewers:
+    name: Auto-Assign Reviewers
+    runs-on: ubuntu-latest
+    if: |
+      contains(github.event.label.name, 'scope:') ||
+      contains(github.event.label.name, 'domaine:') ||
+      contains(github.event.label.name, 'type:promotion')
+
+    steps:
+      - name: Determine reviewers to assign
+        id: reviewers
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const labelName = context.payload.label.name;
+            console.log('Label added:', labelName);
+
+            // Get all current labels
+            const { data: issue } = await github.rest.issues.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number
+            });
+
+            const labels = issue.labels.map(l => l.name);
+            console.log('All labels:', labels);
+
+            let team = null;
+            let reviewGuidelines = '';
+
+            // Priority 1: Promotions (always expert architects)
+            if (labels.includes('type:promotion')) {
+              team = 'comite-architectes-experts';
+              reviewGuidelines = `### 🚀 Promotion Review Guidelines
+
+This PR promotes a domain PRA to bank-wide. Please verify:
+
+- [ ] **3+ proven-in-use** from different domains/teams
+- [ ] **Multi-domain applicability** clearly demonstrated
+- [ ] **Documentation enriched** with learnings from multiple contexts
+- [ ] **Domain committee approval** obtained (original domain)
+- [ ] **Positive feedback** from teams (satisfaction > 7/10)
+
+**Timeline:** 4-8 weeks for thorough review
+
+**Focus areas:**
+- Cross-domain reusability
+- Generalization of domain-specific patterns
+- Impact on existing bank-wide PRAs`;
+            }
+            // Priority 2: Bank-Wide (expert architects)
+            else if (labels.includes('scope:bank-wide')) {
+              team = 'comite-architectes-experts';
+              reviewGuidelines = `### 🏦 Bank-Wide PRA Review Guidelines
+
+This PR introduces or modifies a bank-wide PRA. Please verify:
+
+- [ ] **Applicability** across all domains
+- [ ] **No domain-specific** assumptions or constraints
+- [ ] **Documentation quality** (complete, clear, reusable)
+- [ ] **ADRs** with proper justifications
+- [ ] **Examples** that work in multiple contexts
+
+**Timeline:** 2-4 weeks for review
+
+**Focus areas:**
+- Cross-cutting concerns
+- Enterprise-wide standards
+- Impact on existing architectures`;
+            }
+            // Priority 3: Domain-specific
+            else if (labels.includes('scope:domaine')) {
+              if (labels.includes('domaine:particuliers')) {
+                team = 'comite-gov-particuliers';
+                reviewGuidelines = '**Domaine:** Particuliers (Retail Banking)';
+              } else if (labels.includes('domaine:entreprises')) {
+                team = 'comite-gov-entreprises';
+                reviewGuidelines = '**Domaine:** Entreprises (Corporate Banking)';
+              } else if (labels.includes('domaine:gestion-patrimoine')) {
+                team = 'comite-gov-patrimoine';
+                reviewGuidelines = '**Domaine:** Gestion de Patrimoine (Wealth Management)';
+              }
+
+              reviewGuidelines = `### 🏢 Domain PRA Review Guidelines
+
+${reviewGuidelines}
+
+Please verify:
+
+- [ ] **Relevance** to domain-specific use cases
+- [ ] **1+ proven-in-use** within the domain
+- [ ] **Documentation quality** (complete, clear, reusable)
+- [ ] **ADRs** with domain context
+- [ ] **Examples** relevant to domain
+
+**Timeline:** 5-10 business days for review
+
+**Focus areas:**
+- Domain-specific patterns
+- Reusability within domain
+- Alignment with domain strategy`;
+            }
+
+            if (team) {
+              core.setOutput('team', team);
+              core.setOutput('guidelines', reviewGuidelines);
+              console.log('Team to assign:', team);
+            } else {
+              console.log('No team assignment needed for this label');
+              core.setOutput('team', '');
+            }
+
+      - name: Assign team reviewers
+        if: steps.reviewers.outputs.team != ''
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const team = '${{ steps.reviewers.outputs.team }}';
+
+            try {
+              await github.rest.pulls.requestReviewers({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: context.issue.number,
+                team_reviewers: [team]
+              });
+
+              console.log(`✅ Assigned team: ${team}`);
+            } catch (error) {
+              console.error(`❌ Failed to assign team: ${error.message}`);
+              // Don't fail the workflow if team doesn't exist yet
+              console.log('Note: This might fail if GitHub teams are not yet created');
+            }
+
+      - name: Add review guidelines comment
+        if: steps.reviewers.outputs.team != ''
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const team = '${{ steps.reviewers.outputs.team }}';
+            const guidelines = `${{ steps.reviewers.outputs.guidelines }}`;
+
+            const message = `## 👥 Reviewers Assigned
+
+**Team:** @bnc/${team}
+
+${guidelines}
+
+---
+
+**Required approvals:** 2 from the assigned committee
+
+For questions about the review process, see:
+- [Contribution Guide](/site/content/en/guides/06-contributing.md)
+- [Governance](/site/content/en/guides/08-governance.md)`;
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: message
+            });
+
+            console.log('✅ Review guidelines comment added');
+
+      - name: No assignment needed
+        if: steps.reviewers.outputs.team == ''
+        run: |
+          echo "ℹ️  No reviewer assignment needed for this label"

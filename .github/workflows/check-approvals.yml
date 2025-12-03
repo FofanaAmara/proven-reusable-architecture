@@ -1,0 +1,106 @@
+name: Check Approvals
+
+# Workflow for verifying PR has sufficient approvals
+# Runs on: pull_request_review (submitted)
+#
+# Validates:
+# - Domain PRA: minimum 2 approvals from domain committee
+# - Bank-Wide PRA: minimum 2 approvals from expert architects
+# - Promotion: minimum 2 approvals from expert architects
+# - Blocks merge if insufficient approvals
+
+on:
+  pull_request_review:
+    types: [submitted]
+
+permissions:
+  contents: read
+  pull-requests: read
+  statuses: write
+
+jobs:
+  check-approvals:
+    name: Verify Approval Authority
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Check approval authority
+        id: check
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Checking approval authority for PR #${{ github.event.pull_request.number }}"
+
+          # Run the check script
+          node scripts/check-approval-authority.js \
+            ${{ github.event.pull_request.number }} \
+            ${{ github.repository_owner }} \
+            ${{ github.event.repository.name }}
+
+          # Capture exit code
+          EXIT_CODE=$?
+
+          echo "exit_code=$EXIT_CODE" >> $GITHUB_OUTPUT
+
+          if [ $EXIT_CODE -eq 0 ]; then
+            echo "state=success" >> $GITHUB_OUTPUT
+            echo "description=Sufficient approvals from authorized reviewers" >> $GITHUB_OUTPUT
+          else
+            echo "state=failure" >> $GITHUB_OUTPUT
+            echo "description=Insufficient approvals - see logs for details" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Update commit status
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const state = '${{ steps.check.outputs.state }}';
+            const description = '${{ steps.check.outputs.description }}';
+
+            await github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: context.payload.pull_request.head.sha,
+              state: state,
+              description: description,
+              context: 'PRA Approvals Check'
+            });
+
+            console.log(`✅ Commit status updated: ${state}`);
+
+      - name: Add comment if insufficient
+        if: steps.check.outputs.state == 'failure'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const message = `## ❌ Insufficient Approvals
+
+This PR does not have the required number of approvals from authorized reviewers.
+
+**Next steps:**
+1. Check the workflow logs to see which approvals are missing
+2. Request reviews from the appropriate governance committee
+3. Ensure reviewers are members of the authorized teams
+
+**Note:** Only approvals from authorized team members count toward the requirement.`;
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: message
+            });
+
+      - name: Fail if insufficient
+        if: steps.check.outputs.exit_code != '0'
+        run: |
+          echo "❌ Approval check failed"
+          exit 1
