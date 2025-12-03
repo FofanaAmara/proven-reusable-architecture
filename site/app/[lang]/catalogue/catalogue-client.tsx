@@ -470,11 +470,12 @@ export default function CatalogueClient({ pras, lang }: { pras: PRARow[]; lang: 
         {/* Table */}
         <div className="bg-white rounded-lg shadow-md overflow-hidden mb-6">
           <div className="overflow-x-auto">
-            <table className="w-full">
+            <table className="w-full table-fixed">
               <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
                 <tr>
                   <th
                     className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-200 transition-colors duration-200"
+                    style={{ width: '20%' }}
                     onClick={() => handleSort('name')}
                   >
                     <div className="flex items-center gap-1">
@@ -482,11 +483,12 @@ export default function CatalogueClient({ pras, lang }: { pras: PRARow[]; lang: 
                       {sortKey === 'name' && <span className="text-[#de161d]">{sortDirection === 'asc' ? '↑' : '↓'}</span>}
                     </div>
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider" style={{ width: '32%' }}>
                     {t.description}
                   </th>
                   <th
                     className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-200 transition-colors duration-200"
+                    style={{ width: '10%' }}
                     onClick={() => handleSort('scope')}
                   >
                     <div className="flex items-center gap-1">
@@ -494,11 +496,12 @@ export default function CatalogueClient({ pras, lang }: { pras: PRARow[]; lang: 
                       {sortKey === 'scope' && <span className="text-[#de161d]">{sortDirection === 'asc' ? '↑' : '↓'}</span>}
                     </div>
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider" style={{ width: '14%' }}>
                     {t.domaine}
                   </th>
                   <th
                     className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-200 transition-colors duration-200"
+                    style={{ width: '8%' }}
                     onClick={() => handleSort('category')}
                   >
                     <div className="flex items-center gap-1">
@@ -508,6 +511,7 @@ export default function CatalogueClient({ pras, lang }: { pras: PRARow[]; lang: 
                   </th>
                   <th
                     className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-200 transition-colors duration-200"
+                    style={{ width: '8%' }}
                     onClick={() => handleSort('status')}
                   >
                     <div className="flex items-center gap-1">
@@ -515,24 +519,15 @@ export default function CatalogueClient({ pras, lang }: { pras: PRARow[]; lang: 
                       {sortKey === 'status' && <span className="text-[#de161d]">{sortDirection === 'asc' ? '↑' : '↓'}</span>}
                     </div>
                   </th>
-                  <th className="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider" style={{ width: '8%' }}>
                     {t.proven}
-                  </th>
-                  <th
-                    className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-200 transition-colors duration-200"
-                    onClick={() => handleSort('updated')}
-                  >
-                    <div className="flex items-center gap-1">
-                      {t.updated}
-                      {sortKey === 'updated' && <span className="text-[#de161d]">{sortDirection === 'asc' ? '↑' : '↓'}</span>}
-                    </div>
                   </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 bg-white">
                 {paginatedPRAs.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="px-6 py-12 text-center text-gray-500 text-sm">
+                    <td colSpan={7} className="px-6 py-12 text-center text-gray-500 text-sm">
                       {t.noResults}
                     </td>
                   </tr>
@@ -548,7 +543,7 @@ export default function CatalogueClient({ pras, lang }: { pras: PRARow[]; lang: 
                           {pra.name}
                         </Link>
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-600 max-w-md truncate">{pra.description}</td>
+                      <td className="px-6 py-4 text-sm text-gray-600">{pra.description}</td>
                       <td className="px-6 py-4">{getScopeBadge(pra.scope)}</td>
                       <td className="px-6 py-4">{getDomaineBadge(pra.domaine)}</td>
                       <td className="px-6 py-4">{getCategoryBadge(pra.category)}</td>
@@ -556,7 +551,6 @@ export default function CatalogueClient({ pras, lang }: { pras: PRARow[]; lang: 
                       <td className="px-6 py-4 text-center">
                         <span className="text-sm font-semibold text-[#de161d]">{pra.provenCount}</span>
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-600 whitespace-nowrap">{pra.updated}</td>
                     </tr>
                   ))
                 )}
