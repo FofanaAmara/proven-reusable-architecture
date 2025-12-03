@@ -8,7 +8,7 @@ import { remarkMdxMermaid } from 'fumadocs-core/mdx-plugins';
 
 // French guides
 export const guides_fr = defineDocs({
-  dir: 'content/fr/guides',
+  dir: '../content/fr/guides',
   docs: {
     schema: frontmatterSchema,
     postprocess: {
@@ -22,7 +22,7 @@ export const guides_fr = defineDocs({
 
 // English guides
 export const guides_en = defineDocs({
-  dir: 'content/en/guides',
+  dir: '../content/en/guides',
   docs: {
     schema: frontmatterSchema,
     postprocess: {
@@ -36,7 +36,7 @@ export const guides_en = defineDocs({
 
 // French registry (PRAs only)
 export const registre_fr = defineDocs({
-  dir: 'content/fr/registre',
+  dir: '../content/fr/registre',
   docs: {
     schema: frontmatterSchema,
     postprocess: {
@@ -50,7 +50,7 @@ export const registre_fr = defineDocs({
 
 // English registry (PRAs only)
 export const registre_en = defineDocs({
-  dir: 'content/en/registre',
+  dir: '../content/en/registre',
   docs: {
     schema: frontmatterSchema,
     postprocess: {
