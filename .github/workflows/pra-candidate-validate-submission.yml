@@ -193,6 +193,7 @@ jobs:
             echo "errors=$ERRORS_JSON" >> $GITHUB_OUTPUT
             echo "❌ Validation failed"
             printf '%s\n' "${ERRORS[@]}"
+            exit 1
           fi
 
   assign-reviewers:
