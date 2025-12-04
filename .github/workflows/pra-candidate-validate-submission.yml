@@ -67,25 +67,33 @@ jobs:
         with:
           script: |
             const author = context.payload.pull_request.user.login;
+            console.log('🔍 Checking membership for user: ' + author);
 
             try {
               // Check if author is member of pra-development-team
+              console.log('📡 Calling GitHub API to check team membership...');
               const membership = await github.rest.teams.getMembershipForUserInOrg({
                 org: 'KiyaliHQ',
                 team_slug: 'pra-development-team',
                 username: author
               });
 
+              console.log('📊 Membership response:', JSON.stringify(membership.data, null, 2));
+
               if (membership.data.state === 'active') {
                 console.log('✅ User ' + author + ' is member of pra-development-team');
                 core.setOutput('passed', 'true');
                 return;
+              } else {
+                console.log('⚠️ User ' + author + ' membership state is: ' + membership.data.state);
               }
             } catch (error) {
+              console.error('❌ Error checking membership:', error);
               if (error.status === 404) {
-                console.log('❌ User ' + author + ' is NOT member of pra-development-team');
+                console.log('❌ User ' + author + ' is NOT member of pra-development-team (404)');
               } else {
-                console.error('Error checking membership:', error);
+                console.error('❌ Unexpected error status:', error.status);
+                console.error('❌ Error message:', error.message);
               }
             }
 
