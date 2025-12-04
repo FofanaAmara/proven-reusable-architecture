@@ -210,51 +210,11 @@ jobs:
 
   post-comment:
     name: Post Validation Result
-    needs: [check-framework-protection, detect-and-validate-pra]
+    needs: detect-and-validate-pra
     if: always()
     runs-on: ubuntu-latest
 
     steps:
-      - name: Post framework protection error
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const nonContentFiles = JSON.parse('${{ needs.check-framework-protection.outputs.non_content_files }}');
-            const fileList = nonContentFiles.map(f => '- `' + f + '`').join('\n');
-            const team = '@' + 'KiyaliHQ/pra-development-team';
-
-            const comment = '## 🚫 Framework Modification Blocked\n\n' +
-              'Your PR contains modifications to files outside the `content/` directory. Only members of the **' + team + '** can modify framework files.\n\n' +
-              '### ❌ Blocked Files\n' + fileList + '\n\n' +
-              '### 📂 Allowed Modifications\n' +
-              'Contributors can only modify files in:\n' +
-              '- `content/pras-fr/` - French PRAs\n' +
-              '- `content/pras-en/` - English PRAs\n' +
-              '- `content/guides/` - Registry guides\n\n' +
-              '### 🔧 Framework Files (Restricted)\n' +
-              'The following directories are restricted to the PRA Development Team:\n' +
-              '- `site/` - Next.js application\n' +
-              '- `.github/workflows/` - GitHub workflows\n' +
-              '- `docs/` - Root documentation\n' +
-              '- `scripts/` - Utility scripts\n' +
-              '- `templates/` - PRA templates\n\n' +
-              '### 💡 Need to Modify Framework?\n' +
-              'If you have a legitimate reason to modify framework files:\n' +
-              '1. Contact **' + team + '** on Teams (#pra-registry)\n' +
-              '2. Explain your use case\n' +
-              '3. They will either make the change or grant temporary access\n\n' +
-              '### ✅ Next Steps\n' +
-              '1. Remove modifications to framework files from this PR\n' +
-              '2. Keep only changes to files in `content/`\n' +
-              '3. Push your changes - the validation will re-run automatically';
-
-            await github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: comment
-            });
-
       - name: Post validation success
         if: needs.detect-and-validate-pra.outputs.validation_passed == 'true'
         uses: actions/github-script@v7
