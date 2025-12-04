@@ -138,11 +138,36 @@ jobs:
           fi
 
           # 2. Validate required sections
-          REQUIRED_SECTIONS=("Overview" "Context" "Architecture" "ADR" "Example")
-          for section in "${REQUIRED_SECTIONS[@]}"; do
-            if ! grep -q "^##\s*${section}" "$FIRST_PRA"; then
-              ERRORS+=("Missing section: '$section' section not found")
-            fi
+          ERRORS_SECTIONS=()
+
+          # Check Overview
+          if ! grep -qi "^##\s*Overview" "$FIRST_PRA"; then
+            ERRORS_SECTIONS+=("Overview")
+          fi
+
+          # Check Context
+          if ! grep -qi "^##\s*Context" "$FIRST_PRA"; then
+            ERRORS_SECTIONS+=("Context")
+          fi
+
+          # Check Architecture
+          if ! grep -qi "^##\s*Architecture" "$FIRST_PRA"; then
+            ERRORS_SECTIONS+=("Architecture")
+          fi
+
+          # Check ADR (match both "ADR" and "Architecture Decision Records")
+          if ! grep -qiE "^##\s*(ADR|Architecture Decision Records)" "$FIRST_PRA"; then
+            ERRORS_SECTIONS+=("ADRs")
+          fi
+
+          # Check Example
+          if ! grep -qiE "^##\s*(Example|Code Example)" "$FIRST_PRA"; then
+            ERRORS_SECTIONS+=("Examples")
+          fi
+
+          # Add section errors if any
+          for missing_section in "${ERRORS_SECTIONS[@]}"; do
+            ERRORS+=("Missing section: '$missing_section' section not found")
           done
 
           # 3. Validate bilingual (FR + EN)
