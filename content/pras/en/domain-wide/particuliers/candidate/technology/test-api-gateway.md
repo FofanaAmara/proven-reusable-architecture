@@ -3,7 +3,7 @@ title: Test API Gateway Pattern
 description: Test pattern to validate the approve-pra-candidate workflow
 pra:
   name: API Gateway Test Pattern
-  category: tech
+  category: technology
   status: candidate
   tags: [api, gateway, microservices, test]
   created_at: "2025-12-03"

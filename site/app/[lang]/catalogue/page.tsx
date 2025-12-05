@@ -64,7 +64,7 @@ async function getAllPRAs(lang: Language): Promise<PRARow[]> {
         slug: page.slugs.join('/'),
         name: metadata.name || page.data.title || 'Sans titre',
         description: page.data.description || '',
-        category: metadata.category || 'tech',
+        category: metadata.category || 'technology',
         status: metadata.status || 'candidate',
         tags: metadata.tags || [],
         provenCount: metadata.proven_in_use?.length || 0,

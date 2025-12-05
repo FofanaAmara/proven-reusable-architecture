@@ -32,10 +32,12 @@ PRAs spécifiques à un domaine d'affaires :
 
 ### Catégories
 
-- **Tech** : Infrastructure, déploiement, observabilité
-- **Integration** : APIs, messaging, data sync
+- **Business** : Processus métiers, workflows, stratégie
+- **Application** : Frontend, backend, applications mobiles
+- **Data** : Bases de données, data warehouses, analytics
+- **Technology** : Infrastructure, déploiement, observabilité
 - **Security** : Authentification, autorisation, encryption
-- **Business** : Processus métiers, workflows
+- **Integration** : APIs, messaging, data sync
 
 ## Comment Utiliser ce Registre ?
 

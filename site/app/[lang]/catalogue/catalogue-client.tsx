@@ -25,10 +25,12 @@ const translations = {
     particuliers: 'Particuliers',
     entreprises: 'Entreprises',
     gestionPatrimoine: 'Gestion de Patrimoine',
-    tech: 'Tech',
-    integration: 'Integration',
-    security: 'Security',
     business: 'Business',
+    application: 'Application',
+    data: 'Data',
+    technology: 'Technology',
+    security: 'Security',
+    integration: 'Integration',
     approved: 'Approved',
     candidate: 'Candidate',
     deprecated: 'Deprecated',
@@ -65,10 +67,12 @@ const translations = {
     particuliers: 'Retail',
     entreprises: 'Corporate',
     gestionPatrimoine: 'Wealth Management',
-    tech: 'Tech',
-    integration: 'Integration',
-    security: 'Security',
     business: 'Business',
+    application: 'Application',
+    data: 'Data',
+    technology: 'Technology',
+    security: 'Security',
+    integration: 'Integration',
     approved: 'Approved',
     candidate: 'Candidate',
     deprecated: 'Deprecated',
@@ -103,7 +107,7 @@ interface PRARow {
   domaine?: string;
 }
 
-type Category = 'all' | 'tech' | 'integration' | 'security' | 'business';
+type Category = 'all' | 'business' | 'application' | 'data' | 'technology' | 'security' | 'integration';
 type Status = 'all' | 'approved' | 'candidate' | 'deprecated';
 type Scope = 'all' | 'bank-wide' | 'domaines';
 type Domaine = 'all' | 'particuliers' | 'entreprises' | 'gestion-patrimoine';
@@ -113,10 +117,12 @@ type SortDirection = 'asc' | 'desc';
 const ITEMS_PER_PAGE = 20;
 
 const CATEGORY_LABELS: Record<Exclude<Category, 'all'>, string> = {
-  tech: 'Tech',
-  integration: 'Integration',
-  security: 'Security',
   business: 'Business',
+  application: 'Application',
+  data: 'Data',
+  technology: 'Technology',
+  security: 'Security',
+  integration: 'Integration',
 };
 
 const STATUS_LABELS: Record<Exclude<Status, 'all'>, string> = {
@@ -422,10 +428,12 @@ export default function CatalogueClient({ pras, lang }: { pras: PRARow[]; lang: 
                 className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#de161d]/20 focus:border-[#de161d]/50 transition-all duration-300"
               >
                 <option value="all">{t.allFeminine}</option>
-                <option value="tech">{t.tech}</option>
-                <option value="integration">{t.integration}</option>
-                <option value="security">{t.security}</option>
                 <option value="business">{t.business}</option>
+                <option value="application">{t.application}</option>
+                <option value="data">{t.data}</option>
+                <option value="technology">{t.technology}</option>
+                <option value="security">{t.security}</option>
+                <option value="integration">{t.integration}</option>
               </select>
             </div>
 

@@ -3,7 +3,7 @@ title: API Gateway Pattern
 description: Passerelle centralisée pour gérer les requêtes API dans une architecture microservices
 pra:
   name: API Gateway Pattern
-  category: tech
+  category: technology
   status: candidate
   tags: [api, gateway, microservices, architecture]
   created_at: "2025-12-03"

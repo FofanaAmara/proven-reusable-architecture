@@ -101,7 +101,7 @@ ${processed}`;
 export interface PRAMetadata {
   id: string;
   name: string;
-  category: 'tech' | 'integration' | 'security' | 'business';
+  category: 'business' | 'application' | 'data' | 'technology' | 'security' | 'integration';
   tags: string[];
   status: 'candidate' | 'approved' | 'deprecated';
   version: string;
@@ -121,16 +121,19 @@ export interface ProvenInUse {
 export function getPRAMetadata(page: any): PRAMetadata | null {
   if (!page.data) return null;
 
+  // PRA metadata is nested under page.data.pra
+  const pra = page.data.pra || {};
+
   return {
-    id: page.data.id || '',
-    name: page.data.name || page.data.title || '',
-    category: page.data.category || 'tech',
-    tags: page.data.tags || [],
-    status: page.data.status || 'candidate',
-    version: page.data.version || '1.0.0',
-    proven_in_use: page.data.proven_in_use || [],
-    created_at: page.data.created_at,
-    updated_at: page.data.updated_at,
+    id: pra.id || page.data.id || '',
+    name: pra.name || page.data.title || '',
+    category: pra.category || 'technology',
+    tags: pra.tags || [],
+    status: pra.status || 'candidate',
+    version: pra.version || '1.0.0',
+    proven_in_use: pra.proven_in_use || [],
+    created_at: pra.created_at,
+    updated_at: pra.updated_at,
   };
 }
 
@@ -167,7 +170,7 @@ export function getAllTags(): string[] {
 
 // Helper pour obtenir toutes les catégories
 export function getAllCategories() {
-  return ['tech', 'integration', 'security', 'business'] as const;
+  return ['business', 'application', 'data', 'technology', 'security', 'integration'] as const;
 }
 
 // Helper pour compter les PRAs par statut

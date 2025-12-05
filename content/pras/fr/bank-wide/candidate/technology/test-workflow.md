@@ -3,7 +3,7 @@ title: Test Workflow PRA
 description: PRA de test pour valider les workflows GitHub
 pra:
   name: Test Workflow Pattern
-  category: tech
+  category: technology
   status: candidate
   tags: [test, workflow, automation]
   created_at: "2025-12-02"

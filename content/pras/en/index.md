@@ -32,10 +32,12 @@ PRAs specific to a business domain:
 
 ### Categories
 
-- **Tech**: Infrastructure, deployment, observability
-- **Integration**: APIs, messaging, data sync
+- **Business**: Business processes, workflows, strategy
+- **Application**: Frontend, backend, mobile applications
+- **Data**: Databases, data warehouses, analytics
+- **Technology**: Infrastructure, deployment, observability
 - **Security**: Authentication, authorization, encryption
-- **Business**: Business processes, workflows
+- **Integration**: APIs, messaging, data sync
 
 ## How to Use This Registry?
 
