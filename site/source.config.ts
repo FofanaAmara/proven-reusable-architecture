@@ -42,7 +42,7 @@ export const guides_en = defineDocs({
 
 // All PRAs - French
 export const pras_fr = defineDocs({
-  dir: '../content/pras-fr',
+  dir: '../content/pras/fr',
   docs: {
     schema: frontmatterSchema,
     postprocess: {
@@ -56,7 +56,7 @@ export const pras_fr = defineDocs({
 
 // All PRAs - English
 export const pras_en = defineDocs({
-  dir: '../content/pras-en',
+  dir: '../content/pras/en',
   docs: {
     schema: frontmatterSchema,
     postprocess: {
